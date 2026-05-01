@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculadora de Pintura - Encaja.app">
+    <title>Calculadora de Pintura | Encaja.app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="calc-header">
+            <div class="header-content">
+                <a href="../index.html" class="back-link">← Volver a Encaja</a>
+                <h1>🎨 Calculadora de Pintura</h1>
+                <p class="subtitle">Calcula cuántos botes necesitas. Con integración de tiendas.</p>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <!-- Sidebar - Configuración -->
+            <aside class="sidebar">
+
+                <!-- 1. Seleccionar Producto -->
+                <section class="card">
+                    <h2>① Selecciona tu pintura</h2>
+                    <select id="productSelector" class="form-select">
+                        <option value="">-- Elige un producto --</option>
+                    </select>
+                    <div class="product-info" id="productInfo" style="display:none;">
+                        <div class="info-row">
+                            <span class="label">Rendimiento:</span>
+                            <span class="value" id="rendimientoValue">0</span> m²/L
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Capacidad:</span>
+                            <span class="value" id="capacidadValue">0</span> L
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Precio aprox:</span>
+                            <span class="value" id="precioValue">0</span> €
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Tienda:</span>
+                            <span class="value" id="tiendaValue">-</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Dimensiones Habitación -->
+                <section class="card">
+                    <h2>② Dimensiones habitación</h2>
+                    <div class="input-group">
+                        <label for="ancho">Ancho (m)</label>
+                        <input type="number" id="ancho" value="4" min="1" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="largo">Largo (m)</label>
+                        <input type="number" id="largo" value="3" min="1" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="alto">Alto (m)</label>
+                        <input type="number" id="alto" value="2.2" min="1" step="0.1">
+                    </div>
+                    <div class="info-box">
+                        <strong>Parámetro estándar español:</strong> 2.2m de alto en viviendas
+                    </div>
+                </section>
+
+                <!-- 3. Tipo de Superficies -->
+                <section class="card">
+                    <h2>③ Superficies a pintar</h2>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="paredes" checked value="paredes">
+                            <span>Paredes</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="techo" value="techo">
+                            <span>Techo</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="zocalo" value="zocalo">
+                            <span>Zócalo (primeros 30cm)</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- 4. Número de Capas -->
+                <section class="card">
+                    <h2>④ Número de capas</h2>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="capas">Capas</label>
+                            <input type="number" id="capas" value="1" min="1" max="3" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="perdida">% Pérdida</label>
+                            <input type="number" id="perdida" value="10" min="0" max="50" step="5">
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <strong>Consejo:</strong> Pinturas de colores claros = 1 capa. Oscuros = 2 capas.
+                    </div>
+                </section>
+
+            </aside>
+
+            <!-- Main Content - Resultados -->
+            <section class="main-content">
+
+                <!-- Resultado Principal -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2>📊 RESULTADO</h2>
+                    </div>
+
+                    <div class="result-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Superficie total</div>
+                            <div class="stat-value" id="superficieStat">0.00</div>
+                            <div class="stat-unit">m²</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Litros necesarios</div>
+                            <div class="stat-value" id="litrosStat">0.00</div>
+                            <div class="stat-unit">L</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Botes necesarios</div>
+                            <div class="stat-value" id="botesStat">0</div>
+                            <div class="stat-unit">uds</div>
+                        </div>
+                    </div>
+
+                    <div class="result-main">
+                        <div class="result-label">TOTAL A COMPRAR</div>
+                        <div class="result-number" id="totalResult">0</div>
+                        <div class="result-unit">botes de pintura</div>
+                        <div class="calculation-detail" id="calcDetail"></div>
+                    </div>
+
+                    <div class="result-prices">
+                        <div class="price-row">
+                            <span>Precio unitario:</span>
+                            <span id="precioUnitario">-</span> €
+                        </div>
+                        <div class="price-row">
+                            <span>Precio total aprox:</span>
+                            <span id="precioTotal">-</span> €
+                        </div>
+                    </div>
+
+                    <div class="result-footer">
+                        <p>💡 <strong>Nota:</strong> Los precios son aproximados. Consulta en tu tienda para precios exactos.</p>
+                    </div>
+                </div>
+
+                <!-- Anuncio -->
+                <div class="ad-section">
+                    <div class="ad-placeholder">
+                        <p class="ad-text">Espacio publicitario - Google AdSense</p>
+                    </div>
+                </div>
+
+                <!-- Sección de Tiendas -->
+                <section class="stores-section">
+                    <h2>🛒 Comprar en Tiendas</h2>
+                    <p class="section-subtitle">Ver producto seleccionado en tiendas. Enlaces afiliados.</p>
+                    
+                    <div class="stores-grid">
+                        <a href="#" id="linkLeroy" class="store-card store-leroy" target="_blank" style="display:none;">
+                            <div class="store-logo">LEROY MERLIN</div>
+                            <div class="store-desc">Búsqueda en Leroy Merlin</div>
+                            <div class="store-badge">Ver productos</div>
+                        </a>
+                        <a href="#" id="linkBrico" class="store-card store-bricopot" target="_blank" style="display:none;">
+                            <div class="store-logo">BRICODEPOT</div>
+                            <div class="store-desc">Búsqueda en BricoDépot</div>
+                            <div class="store-badge">Ver productos</div>
+                        </a>
+                        <a href="#" id="linkObramat" class="store-card store-obramat" target="_blank" style="display:none;">
+                            <div class="store-logo">OBRAMAT</div>
+                            <div class="store-desc">Búsqueda en Obramat</div>
+                            <div class="store-badge">Ver productos</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Sección de Consejos -->
+                <section class="tips-section">
+                    <h2>💡 Consejos de pintura</h2>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">🎨</div>
+                            <h3>Preparación</h3>
+                            <p>Limpia y alisa las paredes. El estado previo afecta el rendimiento.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">🌡️</div>
+                            <h3>Condiciones</h3>
+                            <p>Pinta entre 5-25°C. Mala ventilación = más cantidad necesaria.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">✋</div>
+                            <h3>Aplicación</h3>
+                            <p>Rodillo: mejor rendimiento. Brocha: uso detalle. Pistola: profesional.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">📏</div>
+                            <h3>Rendimiento</h3>
+                            <p>Varía según textura. Superficies porosas consumen más.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Encaja.app - Las cuentas de tu próxima obra, resueltas antes de empezar.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../data/productos-pintura.js"></script>
+    <script src="../js/calculadora-pintura.js"></script>
+</body>
+</html>

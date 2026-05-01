@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculadora de Pladur - Encaja.app. Calcula placas de yeso, perfiles metálicos, tornillos y pasta de juntas.">
+    <title>Calculadora de Pladur | Encaja.app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+    /* ====================================================
+       PLADUR — Estilos específicos
+    ==================================================== */
+    :root {
+        --pladur: #4F46E5;
+        --pladur-dark: #3730A3;
+        --pladur-bg: #EEF2FF;
+    }
+
+    .card h2 { color: var(--pladur); }
+    .info-box { border-color: var(--pladur); background: var(--pladur-bg); color: var(--pladur-dark); }
+    .form-select:focus, input[type="number"]:focus, input[type="text"]:focus {
+        border-color: var(--pladur);
+        box-shadow: 0 0 0 3px rgba(79,70,229,.14);
+    }
+
+    .btn-calc {
+        background: var(--pladur);
+        color: white;
+    }
+    .btn-calc:hover {
+        background: var(--pladur-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(79,70,229,.3);
+    }
+
+    .result-card {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+        color: var(--chalk);
+    }
+    .result-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(250,250,248,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(250,250,248,.03) 1px, transparent 1px);
+        background-size: 24px 24px;
+        pointer-events: none;
+    }
+    .result-header {
+        position: relative;
+        z-index: 1;
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid rgba(250,250,248,.08);
+    }
+    .result-header h2 {
+        font-size: .72rem;
+        font-weight: 600;
+        color: var(--pladur);
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        font-family: var(--font-body);
+    }
+    .result-stats {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: rgba(250,250,248,.06);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        margin-bottom: var(--space-lg);
+    }
+    .stat-box {
+        background: rgba(250,250,248,.04);
+        padding: var(--space-md);
+        text-align: center;
+    }
+    .stat-label {
+        font-size: .72rem;
+        color: rgba(250,250,248,.4);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        font-weight: 600;
+        margin-bottom: var(--space-sm);
+    }
+    .stat-value {
+        font-family: var(--font-display);
+        font-size: 1.9rem;
+        color: var(--chalk);
+        line-height: 1;
+        margin-bottom: 2px;
+    }
+    .stat-unit {
+        font-size: .78rem;
+        color: rgba(250,250,248,.35);
+    }
+    .result-main {
+        position: relative;
+        z-index: 1;
+        background: var(--pladur);
+        border-radius: var(--radius-md);
+        padding: var(--space-lg);
+        text-align: center;
+        margin-bottom: var(--space-md);
+    }
+    .result-label {
+        font-size: .72rem;
+        letter-spacing: .12em;
+        color: rgba(250,250,248,.7);
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: var(--space-sm);
+    }
+    .result-number {
+        font-family: var(--font-display);
+        font-size: clamp(2.5rem, 6vw, 3.5rem);
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        letter-spacing: -.03em;
+        margin-bottom: var(--space-sm);
+    }
+    .result-unit {
+        font-size: .95rem;
+        color: rgba(250,250,248,.75);
+        font-weight: 500;
+    }
+
+    .result-prices {
+        position: relative;
+        z-index: 1;
+        background: rgba(250,250,248,.05);
+        border-radius: var(--radius-md);
+        padding: var(--space-md);
+        margin-bottom: var(--space-md);
+        border: 1px solid rgba(250,250,248,.07);
+    }
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(250,250,248,.06);
+        font-size: .875rem;
+        color: rgba(250,250,248,.7);
+        font-weight: 500;
+    }
+    .price-row:last-child {
+        border-bottom: none;
+        color: var(--pladur);
+        font-size: 1rem;
+        font-weight: 700;
+        padding-top: var(--space-md);
+    }
+    .result-detail {
+        position: relative;
+        z-index: 1;
+        margin-top: var(--space-md);
+        padding-top: var(--space-md);
+        border-top: 1px solid rgba(250,250,248,.1);
+        font-size: .82rem;
+        color: rgba(250,250,248,.6);
+        line-height: 1.7;
+    }
+    .result-footer {
+        position: relative;
+        z-index: 1;
+        background: rgba(79,70,229,.12);
+        border-left: 3px solid var(--pladur);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        padding: 10px 14px;
+        font-size: .82rem;
+        color: rgba(250,250,248,.6);
+        line-height: 1.5;
+        margin-top: var(--space-md);
+    }
+
+    .breakdown-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: var(--space-md);
+        font-size: .85rem;
+    }
+    .breakdown-table th {
+        text-align: left;
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(250,250,248,.1);
+        color: rgba(250,250,248,.5);
+        font-weight: 600;
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+    .breakdown-table td {
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(250,250,248,.06);
+        color: rgba(250,250,248,.7);
+    }
+    .breakdown-table tr:last-child td {
+        border-bottom: none;
+        font-weight: 700;
+        color: var(--pladur);
+        font-size: .95rem;
+    }
+
+    .action-bar { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+    .action-bar .btn { flex: 1; min-width: 140px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="calc-header">
+            <div class="header-content">
+                <a href="../index.html" class="back-link">← Volver a Encaja</a>
+                <h1>🧱 Calculadora de Pladur</h1>
+                <p class="subtitle">Calcula placas, perfiles, tornillos y pasta de juntas para tu instalación de cartón yeso.</p>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <!-- Sidebar - Configuración -->
+            <aside class="sidebar">
+
+                <!-- 1. Seleccionar tipo de placa -->
+                <section class="card">
+                    <h3>① Tipo de placa</h3>
+                    <select id="productSelector" class="form-select">
+                        <option value="">-- Elige una placa --</option>
+                    </select>
+                    <div class="product-info" id="productInfo" style="display:none;">
+                        <div class="info-row">
+                            <span class="label">Dimensiones:</span>
+                            <span class="value" id="dimValue">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Precio/m²:</span>
+                            <span class="value" id="precioM2Value">0</span> €
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Precio ud.:</span>
+                            <span class="value" id="precioUdValue">0</span> €
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Tienda:</span>
+                            <span class="value" id="tiendaValue">-</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Superficie y montaje -->
+                <section class="card">
+                    <h3>② Superficie y montaje</h3>
+                    <div class="input-group">
+                        <label for="superficie">Superficie a revestir (m²)</label>
+                        <input type="number" id="superficie" value="10" min="1" step="0.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="montaje">Tipo de montaje</label>
+                        <select id="montaje" class="form-select">
+                            <option value="simple">Simple capa</option>
+                            <option value="doble">Doble capa</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="merma">% Desperdicio (merma)</label>
+                        <input type="number" id="merma" value="10" min="0" max="30" step="5">
+                    </div>
+                    <div class="info-box">
+                        <strong>Nota:</strong> Montantes cada 60 cm. Canales superior + inferior incluidos.
+                    </div>
+                </section>
+
+            </aside>
+
+            <!-- Main Content - Resultados -->
+            <section class="main-content">
+
+                <!-- Resultado Principal -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2>📊 PRESUPUESTO PLADUR</h2>
+                    </div>
+
+                    <div class="result-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Superficie</div>
+                            <div class="stat-value" id="statSuperficie">0.00</div>
+                            <div class="stat-unit">m²</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Placas</div>
+                            <div class="stat-value" id="statPlacas">0</div>
+                            <div class="stat-unit">uds</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Presupuesto</div>
+                            <div class="stat-value" id="statTotal">0.00</div>
+                            <div class="stat-unit">€</div>
+                        </div>
+                    </div>
+
+                    <div class="result-main">
+                        <div class="result-label">TOTAL PRESUPUESTO APROX.</div>
+                        <div class="result-number" id="totalResult">0.00</div>
+                        <div class="result-unit">€ (materiales + accesorios)</div>
+                    </div>
+
+                    <div class="result-prices" id="resultPrices">
+                        <div class="price-row">
+                            <span>🏗️ Placas de yeso</span>
+                            <span id="precioPlacas">0.00 €</span>
+                        </div>
+                        <div class="price-row">
+                            <span>🔩 Perfiles metálicos</span>
+                            <span id="precioPerfiles">0.00 €</span>
+                        </div>
+                        <div class="price-row">
+                            <span>🔧 Accesorios (tornillos, pasta, cinta)</span>
+                            <span id="precioAccesorios">0.00 €</span>
+                        </div>
+                        <div class="price-row">
+                            <span>💶 TOTAL MATERIAL</span>
+                            <span id="precioTotal">0.00 €</span>
+                        </div>
+                    </div>
+
+                    <table class="breakdown-table" id="breakdownTable">
+                        <thead>
+                            <tr><th>Material</th><th>Cantidad</th><th>Ud.</th><th>Precio</th></tr>
+                        </thead>
+                        <tbody id="breakdownBody"></tbody>
+                    </table>
+
+                    <div class="result-detail" id="calcDetail">
+                        Selecciona una placa e introduce la superficie para calcular.
+                    </div>
+
+                    <div class="result-footer">
+                        <p>💡 <strong>Nota:</strong> Los precios son orientativos. Consulta en tienda para precios exactos. Se incluye un 10% de merma estándar.</p>
+                    </div>
+                </div>
+
+                <!-- Anuncio -->
+                <div class="ad-section">
+                    <div class="ad-placeholder">
+                        <p class="ad-text">Espacio publicitario - Google AdSense</p>
+                    </div>
+                </div>
+
+                <!-- Sección de Tiendas -->
+                <section class="stores-section">
+                    <h2>🛒 Comprar en tiendas</h2>
+                    <p class="section-subtitle">Ver productos de pladur y perfiles en las principales tiendas de bricolaje.</p>
+                    
+                    <div class="stores-grid">
+                        <a href="#" id="linkLeroy" class="store-card store-leroy" target="_blank" rel="noopener">
+                            <div class="store-logo">LEROY MERLIN</div>
+                            <div class="store-desc">Busca placas de yeso, perfiles y accesorios Pladur en Leroy Merlin.</div>
+                            <div class="store-badge">Ver productos</div>
+                        </a>
+                        <a href="#" id="linkBrico" class="store-card store-bricopot" target="_blank" rel="noopener">
+                            <div class="store-logo">BRICODÉPOT</div>
+                            <div class="store-desc">Encuentra placas, perfiles y material de instalación en BricoDépot.</div>
+                            <div class="store-badge">Ver productos</div>
+                        </a>
+                        <a href="#" id="linkObramat" class="store-card store-obramat" target="_blank" rel="noopener">
+                            <div class="store-logo">OBRAMAT</div>
+                            <div class="store-desc">Compra placas de yeso y perfilería en Obramat al mejor precio.</div>
+                            <div class="store-badge">Ver productos</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Sección de Consejos -->
+                <section class="tips-section">
+                    <h2>💡 Consejos de instalación Pladur</h2>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <span class="tip-icon">📐</span>
+                            <h3>Replanteo</h3>
+                            <p>Marca la posición del canal en suelo y techo con nivel láser antes de atornillar. Los montantes deben ir cada 60 cm exactos.</p>
+                        </div>
+                        <div class="tip-card">
+                            <span class="tip-icon">🔩</span>
+                            <h3>Tornillería</h3>
+                            <p>Usa tornillos para madera en perfiles metálicos (punta fina). Sepáralos 20-25 cm en bordes y 30 cm en el centro de la placa.</p>
+                        </div>
+                        <div class="tip-card">
+                            <span class="tip-icon">🧯</span>
+                            <h3>Juntas</h3>
+                            <p>Escalonea las juntas verticales al menos 40 cm entre capas. Aplica pasta de juntas con malla autoadhesiva en 3 capas finas.</p>
+                        </div>
+                        <div class="tip-card">
+                            <span class="tip-icon">💧</span>
+                            <h3>Humedad</h3>
+                            <p>En baños y cocinas usa placa hidrófuga (WA). Sella todas las juntas y aplica imprimación antes de alicatar o pintar.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Encaja.app - Las cuentas de tu próxima obra, resueltas antes de empezar.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../data/productos-pladur.js"></script>
+    <script src="../js/calculadora-pladur.js"></script>
+</body>
+</html>

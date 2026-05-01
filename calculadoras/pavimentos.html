@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculadora de Pavimentos y Cerámica - Encaja.app">
+    <title>Calculadora de Pavimentos y Cerámica | Encaja.app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="calc-header">
+            <div class="header-content">
+                <a href="../index.html" class="back-link">← Volver a Encaja</a>
+                <h1>Tiles & Ceramic | Pavimentos y Cerámica</h1>
+                <p class="subtitle">Calcula cuántas cajas/paquetes necesitas para tu suelo o pared.</p>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <!-- Sidebar - Configuración -->
+            <aside class="sidebar">
+
+                <!-- 1. Seleccionar Formato Predefinido -->
+                <section class="card">
+                    <h2>① Formato Cerámica</h2>
+                    <select id="productSelector" class="form-select">
+                        <option value="custom">-- Medidas personalizadas --</option>
+                    </select>
+                    
+                    <div id="customPieceInputs" class="input-row" style="margin-top: 15px;">
+                        <div class="input-group">
+                            <label for="pLargo">Largo Pieza (cm)</label>
+                            <input type="number" id="pLargo" value="60" min="1" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="pAncho">Ancho Pieza (cm)</label>
+                            <input type="number" id="pAncho" value="60" min="1" step="1">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label for="m2Caja">m² por Paquete</label>
+                        <input type="number" id="m2Caja" value="1.44" min="0.1" step="0.01">
+                    </div>
+
+                    <div class="product-info" id="productInfo" style="display:none;">
+                        <div class="info-row">
+                            <span class="label">Precio Caja:</span>
+                            <span class="value" id="precioCajaValue">0</span> €
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Tienda:</span>
+                            <span class="value" id="tiendaValue">-</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Superficie a cubrir -->
+                <section class="card">
+                    <h2>② ¿Qué vas a alicatar?</h2>
+                    <div class="input-group">
+                        <label for="largo">Largo Superficie (m)</label>
+                        <input type="number" id="largo" value="4" min="0.1" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="ancho">Ancho / Alto (m)</label>
+                        <input type="number" id="ancho" value="3.5" min="0.1" step="0.1">
+                    </div>
+                    <div class="info-box">
+                        Si es una pared, introduce el largo y el alto. Si es un suelo, el largo y el ancho.
+                    </div>
+                </section>
+
+                <!-- 3. Ajustes de Colocación -->
+                <section class="card">
+                    <h2>③ Ajustes de Junta</h2>
+                    <div class="input-group">
+                        <label for="junta">Espesor Junta (mm)</label>
+                        <input type="number" id="junta" value="2" min="0" max="10" step="0.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="merma">% Desperdicio</label>
+                        <input type="number" id="merma" value="10" min="0" max="30" step="1">
+                    </div>
+                </section>
+
+            </aside>
+
+            <!-- Main Content - Resultados -->
+            <section class="main-content">
+
+                <!-- Resultado Principal -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2>📊 RESULTADO</h2>
+                    </div>
+
+                    <div class="result-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Superficie Total</div>
+                            <div class="stat-value" id="superficieStat">0.00</div>
+                            <div class="stat-unit">m²</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">m² a Comprar</div>
+                            <div class="stat-value" id="totalM2Stat">0.00</div>
+                            <div class="stat-unit">m²</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Piezas Estimadas</div>
+                            <div class="stat-value" id="piezasStat">0</div>
+                            <div class="stat-unit">unidades</div>
+                        </div>
+                    </div>
+
+                    <div class="result-main" style="border-color: var(--secondary);">
+                        <div class="result-label" style="color: var(--secondary);">PAQUETES NECESARIOS</div>
+                        <div class="result-number" id="totalResult" style="color: var(--secondary);">0</div>
+                        <div class="result-unit">Cajas de cerámica</div>
+                        <div class="calculation-detail" id="calcDetail"></div>
+                    </div>
+
+                    <div class="result-prices">
+                        <div class="price-row">
+                            <span>Precio por caja:</span>
+                            <span id="precioCajaDisplay">-</span> €
+                        </div>
+                        <div class="price-row">
+                            <span>Inversión total aprox:</span>
+                            <span id="precioTotal">-</span> €
+                        </div>
+                    </div>
+
+                    <div class="result-footer" style="border-color: var(--secondary); color: #065f46; background: #ecfdf5;">
+                        <p>💡 <strong>Recomendación:</strong> Siempre compra una caja de más para futuros repuestos en caso de roturas.</p>
+                    </div>
+                </div>
+
+                <!-- Sección de Tiendas -->
+                <section class="stores-section">
+                    <h2>🛒 Tiendas Especializadas</h2>
+                    <div class="stores-grid">
+                        <a href="https://www.obramat.es" class="store-card" target="_blank">
+                            <div class="store-logo">OBRAMAT</div>
+                            <div class="store-desc">Stock profesional. Cerámica y cemento cola.</div>
+                            <div class="store-badge">Ver disponibilidad</div>
+                        </a>
+                        <a href="https://www.leroymerlin.es" class="store-card" target="_blank">
+                            <div class="store-logo">LEROY MERLIN</div>
+                            <div class="store-desc">Diseños modernos y exposiciones.</div>
+                            <div class="store-badge">Ver catálogo</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Sección de Consejos -->
+                <section class="tips-section">
+                    <h2>💡 Consejos de alicatado</h2>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">📐</div>
+                            <h3>Replanteo</h3>
+                            <p>Mide bien el centro de la estancia. Evita que queden "tiras" pequeñas en los laterales.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">🥄</div>
+                            <h3>Doble Encolado</h3>
+                            <p>Para piezas de más de 30cm, aplica cemento cola tanto en la pared como en la pieza.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">🧩</div>
+                            <h3>Crucetas</h3>
+                            <p>Usa crucetas y sistemas de nivelación para que las juntas queden perfectas.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Encaja.app - Las cuentas de tu próxima obra, resueltas antes de empezar.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../data/productos-pavimentos.js"></script>
+    <script src="../js/calculadora-pavimentos.js"></script>
+</body>
+</html>

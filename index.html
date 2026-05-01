@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Encaja.app - Las cuentas de tu próxima obra, resueltas antes de empezar. Calcula ladrillos, madera, pintura, suelos y más.">
+    <title>Encaja.app - Calculadoras de Construcción</title>
+
+    <!-- Fuentes: Syne (display) + Inter (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+    /* ====================================================
+       VARIABLES & TOKENS
+    ==================================================== */
+    :root {
+        /* Core palette */
+        --ink:      #111010;
+        --clay:     #D97706;   /* ámbar cálido — acento principal */
+        --clay-light: #FEF3C7;
+        --sage:     #065F46;   /* verde oscuro — acento secundario */
+        --chalk:    #FAFAF8;   /* fondo cálido */
+        --stone:    #F2F0EB;   /* alternancia de secciones */
+        --mist:     #DDD9CF;   /* bordes */
+        --dust:     #7C7B77;   /* texto secundario */
+
+        /* Colores únicos por calculadora */
+        --c-muros:       #B45309;
+        --c-pintura:     #7C3AED;
+        --c-madera:      #065F46;
+        --c-pavimentos:  #1D4ED8;
+        --c-pladur:      #BE185D;
+
+        /* Tipografía */
+        --font-display: 'Syne', sans-serif;
+        --font-body:    'Inter', sans-serif;
+
+        /* Espaciado base */
+        --space-xs: 4px;
+        --space-sm: 8px;
+        --space-md: 16px;
+        --space-lg: 32px;
+        --space-xl: 64px;
+        --space-2xl: 120px;
+
+        /* Border radius */
+        --radius-sm:  4px;
+        --radius-md:  8px;
+        --radius-lg: 16px;
+
+        /* Sombras */
+        --shadow-sm: 0 1px 3px rgba(17,16,16,.08), 0 1px 2px rgba(17,16,16,.04);
+        --shadow-md: 0 4px 12px rgba(17,16,16,.10), 0 2px 4px rgba(17,16,16,.06);
+        --shadow-lg: 0 16px 40px rgba(17,16,16,.12), 0 4px 8px rgba(17,16,16,.06);
+
+        /* Transiciones */
+        --ease: cubic-bezier(.16,1,.3,1);
+        --duration: 300ms;
+    }
+
+    /* ====================================================
+       RESET
+    ==================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+        font-family: var(--font-body);
+        background: var(--chalk);
+        color: var(--ink);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    a { color: inherit; }
+
+    h1, h2, h3, h4 {
+        font-family: var(--font-display);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    p { color: var(--dust); }
+
+    /* ====================================================
+       UTILIDADES
+    ==================================================== */
+    .container {
+        width: min(1200px, 100%);
+        margin-inline: auto;
+        padding-inline: var(--space-lg);
+    }
+
+    @media (max-width: 768px) {
+        .container { padding-inline: var(--space-md); }
+    }
+
+    .section-label {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        font-size: .75rem;
+        font-weight: 600;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--clay);
+        margin-bottom: var(--space-md);
+    }
+
+    .section-label::before {
+        content: '';
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: var(--clay);
+        border-radius: 2px;
+    }
+
+    /* ====================================================
+       BOTONES
+    ==================================================== */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-sm);
+        padding: 14px 28px;
+        border-radius: var(--radius-md);
+        font-family: var(--font-body);
+        font-size: .95rem;
+        font-weight: 600;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: transform var(--duration) var(--ease),
+                    box-shadow var(--duration) var(--ease),
+                    background var(--duration) var(--ease);
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: var(--clay);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #B45309;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(217,119,6,.35);
+    }
+
+    .btn-ghost {
+        background: transparent;
+        color: var(--chalk);
+        border: 1.5px solid rgba(250,250,248,.3);
+    }
+
+    .btn-ghost:hover {
+        background: rgba(250,250,248,.10);
+        border-color: rgba(250,250,248,.6);
+    }
+
+    .btn-outline {
+        background: white;
+        color: var(--ink);
+        border: 1.5px solid var(--mist);
+    }
+
+    .btn-outline:hover {
+        border-color: var(--clay);
+        color: var(--clay);
+    }
+
+    .btn-lg {
+        padding: 16px 36px;
+        font-size: 1rem;
+    }
+
+    .btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    /* ====================================================
+       NAVBAR
+    ==================================================== */
+    .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(250,250,248,.95);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--mist);
+    }
+
+    .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+    }
+
+    .logo {
+        display: flex;
+        align-items: baseline;
+        gap: 2px;
+        text-decoration: none;
+    }
+
+    .logo-main {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        color: var(--ink);
+        letter-spacing: -.03em;
+    }
+
+    .logo-dot {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        color: var(--clay);
+    }
+
+    .logo-ext {
+        font-family: var(--font-body);
+        font-size: .9rem;
+        font-weight: 500;
+        color: var(--clay);
+    }
+
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: var(--space-xl);
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        font-size: .875rem;
+        font-weight: 500;
+        color: var(--dust);
+        transition: color var(--duration);
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    @media (max-width: 768px) {
+        .nav-links { gap: var(--space-lg); }
+        .nav-links a { font-size: .8rem; }
+    }
+
+    @media (max-width: 480px) {
+        .nav-links { display: none; }
+    }
+
+    /* ====================================================
+       HERO
+    ==================================================== */
+    .hero {
+        background: var(--ink);
+        color: var(--chalk);
+        padding-top: var(--space-2xl);
+        padding-bottom: 0;
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Patrón de cuadrícula de obra */
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(250,250,248,.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(250,250,248,.04) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+    }
+
+    /* Acento de color cálido en esquina */
+    .hero::after {
+        content: '';
+        position: absolute;
+        top: -120px;
+        right: -120px;
+        width: 480px;
+        height: 480px;
+        background: radial-gradient(circle, rgba(217,119,6,.18) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .hero-inner {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        background: rgba(217,119,6,.15);
+        border: 1px solid rgba(217,119,6,.30);
+        border-radius: 100px;
+        padding: 6px 14px;
+        font-size: .8rem;
+        font-weight: 600;
+        color: #FCD34D;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        margin-bottom: var(--space-lg);
+    }
+
+    .hero-tag::before {
+        content: '';
+        display: block;
+        width: 6px;
+        height: 6px;
+        background: var(--clay);
+        border-radius: 50%;
+    }
+
+    .hero-title {
+        font-size: clamp(2.4rem, 6vw, 4.5rem);
+        color: var(--chalk);
+        max-width: 14ch;
+        margin-bottom: var(--space-lg);
+    }
+
+    .hero-title em {
+        font-style: normal;
+        color: var(--clay);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        color: rgba(250,250,248,.6);
+        max-width: 52ch;
+        font-weight: 400;
+        margin-bottom: var(--space-xl);
+        line-height: 1.7;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: var(--space-md);
+        flex-wrap: wrap;
+    }
+
+    .hero-bottom {
+        margin-top: var(--space-2xl);
+        border-top: 1px solid rgba(250,250,248,.08);
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: rgba(250,250,248,.08);
+    }
+
+    .hero-stat {
+        padding: var(--space-lg) 0;
+        text-align: center;
+        background: var(--ink);
+    }
+
+    .hero-stat-num {
+        font-family: var(--font-display);
+        font-size: 2.2rem;
+        color: var(--chalk);
+        display: block;
+        margin-bottom: var(--space-xs);
+    }
+
+    .hero-stat-num span {
+        color: var(--clay);
+    }
+
+    .hero-stat-label {
+        font-size: .82rem;
+        color: rgba(250,250,248,.45);
+        font-weight: 500;
+        letter-spacing: .03em;
+    }
+
+    @media (max-width: 768px) {
+        .hero { padding-top: var(--space-xl); }
+        .hero-bottom { grid-template-columns: 1fr; }
+        .hero-stat { padding: var(--space-md); }
+        .hero-cta { flex-direction: column; }
+        .hero-cta .btn { width: 100%; justify-content: center; }
+    }
+
+    /* ====================================================
+       CALCULADORAS SECTION
+    ==================================================== */
+    .section-calculadoras {
+        padding-top: var(--space-2xl);
+        padding-bottom: var(--space-2xl);
+    }
+
+    .section-head {
+        margin-bottom: var(--space-xl);
+    }
+
+    .section-head h2 {
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        color: var(--ink);
+        margin-top: var(--space-sm);
+        max-width: 22ch;
+    }
+
+    .calc-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: var(--mist);
+        border: 1px solid var(--mist);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    @media (max-width: 1024px) {
+        .calc-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+        .calc-grid { grid-template-columns: 1fr; }
+    }
+
+    .calc-card {
+        background: white;
+        padding: var(--space-xl) var(--space-lg);
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+        position: relative;
+        transition: background var(--duration) var(--ease), transform var(--duration) var(--ease);
+        overflow: hidden;
+    }
+
+    /* Barra lateral coloreada */
+    .calc-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: var(--space-lg);
+        bottom: var(--space-lg);
+        width: 3px;
+        border-radius: 0 2px 2px 0;
+        background: var(--card-color, var(--clay));
+        opacity: 0;
+        transition: opacity var(--duration) var(--ease), top var(--duration) var(--ease), bottom var(--duration) var(--ease);
+    }
+
+    .calc-card:hover { background: var(--chalk); }
+    .calc-card:hover::before { opacity: 1; }
+
+    .calc-card-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        background: var(--card-bg, #FEF3C7);
+        margin-bottom: var(--space-xs);
+        transition: transform var(--duration) var(--ease);
+    }
+
+    .calc-card:hover .calc-card-icon {
+        transform: scale(1.08);
+    }
+
+    .calc-card h3 {
+        font-size: 1.15rem;
+        color: var(--ink);
+        font-family: var(--font-display);
+    }
+
+    .calc-card p {
+        font-size: .875rem;
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .calc-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+        margin-top: var(--space-xs);
+    }
+
+    .calc-tag {
+        font-size: .73rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 100px;
+        color: var(--card-color, var(--clay));
+        background: var(--card-bg, #FEF3C7);
+        letter-spacing: .03em;
+    }
+
+    .calc-cta {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        font-size: .875rem;
+        font-weight: 600;
+        color: var(--card-color, var(--clay));
+        margin-top: var(--space-xs);
+        transition: gap var(--duration) var(--ease);
+    }
+
+    .calc-card:hover .calc-cta { gap: var(--space-sm); }
+
+    .calc-cta::after {
+        content: '→';
+        transition: transform var(--duration) var(--ease);
+    }
+
+    /* Colores individuales por calculadora */
+    .calc-muros {
+        --card-color: var(--c-muros);
+        --card-bg: #FEF3C7;
+    }
+
+    .calc-pintura {
+        --card-color: var(--c-pintura);
+        --card-bg: #EDE9FE;
+    }
+
+    .calc-madera {
+        --card-color: var(--c-madera);
+        --card-bg: #D1FAE5;
+    }
+
+    .calc-pavimentos {
+        --card-color: var(--c-pavimentos);
+        --card-bg: #DBEAFE;
+    }
+
+    .calc-pladur {
+        --card-color: var(--c-pladur);
+        --card-bg: #FCE7F3;
+    }
+
+    .calc-depiece {
+        --card-color: #78350F;
+        --card-bg: #FEF3C7;
+    }
+
+    /* ====================================================
+       FEATURES SECTION
+    ==================================================== */
+    .section-features {
+        background: var(--stone);
+        padding-top: var(--space-2xl);
+        padding-bottom: var(--space-2xl);
+    }
+
+    .features-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-2xl);
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .features-layout {
+            grid-template-columns: 1fr;
+            gap: var(--space-xl);
+        }
+    }
+
+    .features-copy h2 {
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        color: var(--ink);
+        margin-top: var(--space-sm);
+        margin-bottom: var(--space-lg);
+    }
+
+    .features-copy p {
+        font-size: 1rem;
+        line-height: 1.75;
+        margin-bottom: var(--space-xl);
+    }
+
+    .features-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .feature-item {
+        display: flex;
+        gap: var(--space-md);
+        align-items: flex-start;
+        padding: var(--space-md);
+        background: white;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--mist);
+        transition: box-shadow var(--duration) var(--ease), transform var(--duration) var(--ease);
+    }
+
+    .feature-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateX(4px);
+    }
+
+    .feature-ico {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: var(--radius-sm);
+        background: var(--clay-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .feature-text h4 {
+        font-size: .95rem;
+        color: var(--ink);
+        margin-bottom: 2px;
+    }
+
+    .feature-text p {
+        font-size: .85rem;
+        margin: 0;
+    }
+
+    /* Panel de mockup derecho */
+    .features-visual {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+        color: var(--chalk);
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .features-visual::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(250,250,248,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(250,250,248,.03) 1px, transparent 1px);
+        background-size: 24px 24px;
+    }
+
+    .mockup-header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid rgba(250,250,248,.08);
+    }
+
+    .mockup-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .mockup-title {
+        font-size: .8rem;
+        color: rgba(250,250,248,.4);
+        font-weight: 500;
+        margin-left: var(--space-sm);
+    }
+
+    .mockup-row {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-md);
+        background: rgba(250,250,248,.05);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--space-sm);
+        border: 1px solid rgba(250,250,248,.06);
+    }
+
+    .mockup-row-label {
+        font-size: .8rem;
+        color: rgba(250,250,248,.5);
+    }
+
+    .mockup-row-val {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        color: var(--clay);
+    }
+
+    .mockup-result {
+        position: relative;
+        z-index: 1;
+        margin-top: var(--space-lg);
+        background: var(--clay);
+        border-radius: var(--radius-md);
+        padding: var(--space-lg);
+        text-align: center;
+    }
+
+    .mockup-result-label {
+        font-size: .75rem;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: rgba(250,250,248,.7);
+        margin-bottom: var(--space-sm);
+    }
+
+    .mockup-result-num {
+        font-family: var(--font-display);
+        font-size: 3rem;
+        color: white;
+        line-height: 1;
+    }
+
+    .mockup-result-unit {
+        font-size: .85rem;
+        color: rgba(250,250,248,.8);
+        margin-top: var(--space-xs);
+    }
+
+    /* ====================================================
+       AD SECTION
+    ==================================================== */
+    .ad-section {
+        padding: var(--space-lg) 0;
+    }
+
+    .ad-placeholder {
+        background: var(--stone);
+        border: 1px dashed var(--mist);
+        border-radius: var(--radius-md);
+        padding: 40px 20px;
+        text-align: center;
+    }
+
+    .ad-text {
+        color: var(--dust);
+        font-size: .85rem;
+        font-style: italic;
+    }
+
+    /* ====================================================
+       PRICING SECTION
+    ==================================================== */
+    .section-pricing {
+        padding-top: var(--space-2xl);
+        padding-bottom: var(--space-2xl);
+    }
+
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-lg);
+        margin-top: var(--space-xl);
+    }
+
+    @media (max-width: 1024px) {
+        .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+        .pricing-grid { grid-template-columns: 1fr; }
+    }
+
+    .pricing-card {
+        background: white;
+        border: 1.5px solid var(--mist);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl) var(--space-lg);
+        position: relative;
+        transition: box-shadow var(--duration) var(--ease), transform var(--duration) var(--ease);
+    }
+
+    .pricing-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-4px);
+    }
+
+    .pricing-card.is-current {
+        border-color: var(--clay);
+        background: var(--ink);
+        color: var(--chalk);
+    }
+
+    .pricing-badge {
+        display: inline-block;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 100px;
+        margin-bottom: var(--space-md);
+    }
+
+    .is-current .pricing-badge {
+        background: var(--clay);
+        color: white;
+    }
+
+    .pricing-card:not(.is-current) .pricing-badge {
+        background: var(--stone);
+        color: var(--dust);
+    }
+
+    .pricing-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: var(--space-sm);
+        color: inherit;
+    }
+
+    .is-current h3 { color: var(--chalk); }
+
+    .pricing-price {
+        font-family: var(--font-display);
+        font-size: 2.8rem;
+        line-height: 1;
+        letter-spacing: -.04em;
+        margin: var(--space-lg) 0;
+        color: var(--clay);
+    }
+
+    .pricing-price sub {
+        font-family: var(--font-body);
+        font-size: 1rem;
+        color: var(--dust);
+        font-weight: 400;
+        letter-spacing: 0;
+    }
+
+    .pricing-features {
+        list-style: none;
+        margin-bottom: var(--space-xl);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .pricing-features li {
+        display: flex;
+        gap: var(--space-sm);
+        font-size: .9rem;
+        color: var(--ink);
+        font-weight: 500;
+    }
+
+    .is-current .pricing-features li { color: rgba(250,250,248,.85); }
+
+    .pricing-features li::before {
+        content: '✓';
+        color: var(--clay);
+        font-weight: 700;
+    }
+
+    .pricing-card .btn { width: 100%; }
+
+    .pricing-card:not(.is-current) .btn-primary {
+        background: var(--ink);
+        color: white;
+    }
+
+    /* ====================================================
+       CTA SECTION
+    ==================================================== */
+    .section-cta {
+        padding-top: 0;
+        padding-bottom: var(--space-2xl);
+    }
+
+    .cta-inner {
+        background: var(--ink);
+        border-radius: var(--radius-lg);
+        padding: var(--space-2xl) var(--space-xl);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-inner::before {
+        content: '';
+        position: absolute;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 500px;
+        height: 300px;
+        background: radial-gradient(ellipse, rgba(217,119,6,.25) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .cta-inner h2 {
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        color: var(--chalk);
+        position: relative;
+        z-index: 1;
+        margin-bottom: var(--space-md);
+    }
+
+    .cta-inner p {
+        color: rgba(250,250,248,.55);
+        font-size: 1.05rem;
+        margin-bottom: var(--space-xl);
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-inner .btn-primary { position: relative; z-index: 1; }
+
+    /* ====================================================
+       FOOTER
+    ==================================================== */
+    .footer {
+        background: #0D0D0D;
+        padding-top: var(--space-xl);
+        padding-bottom: var(--space-lg);
+    }
+
+    .footer-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr;
+        gap: var(--space-xl);
+        padding-bottom: var(--space-xl);
+        border-bottom: 1px solid rgba(250,250,248,.07);
+        margin-bottom: var(--space-lg);
+    }
+
+    @media (max-width: 768px) {
+        .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 480px) {
+        .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    .footer-brand .logo-main { color: var(--chalk); }
+
+    .footer-brand p {
+        font-size: .875rem;
+        color: rgba(250,250,248,.35);
+        margin-top: var(--space-md);
+        margin-bottom: var(--space-lg);
+        line-height: 1.7;
+        max-width: 28ch;
+    }
+
+    .social-links {
+        display: flex;
+        gap: var(--space-sm);
+    }
+
+    .social-links a {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        background: rgba(250,250,248,.07);
+        border: 1px solid rgba(250,250,248,.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .8rem;
+        color: rgba(250,250,248,.5);
+        text-decoration: none;
+        transition: background var(--duration), color var(--duration);
+    }
+
+    .social-links a:hover {
+        background: var(--clay);
+        color: white;
+        border-color: var(--clay);
+    }
+
+    .footer-col h4 {
+        font-family: var(--font-display);
+        font-size: .9rem;
+        color: var(--chalk);
+        margin-bottom: var(--space-md);
+        letter-spacing: -.01em;
+    }
+
+    .footer-col ul { list-style: none; }
+
+    .footer-col li + li { margin-top: var(--space-sm); }
+
+    .footer-col a {
+        text-decoration: none;
+        font-size: .875rem;
+        color: rgba(250,250,248,.35);
+        transition: color var(--duration);
+    }
+
+    .footer-col a:hover { color: rgba(250,250,248,.8); }
+
+    .footer-bottom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .footer-bottom p {
+        font-size: .8rem;
+        color: rgba(250,250,248,.22);
+    }
+
+    /* ====================================================
+       PRINT
+    ==================================================== */
+    @media print {
+        .navbar, .ad-section, .section-cta, .footer { display: none; }
+    }
+
+    </style>
+</head>
+<body>
+
+    <!-- ====== NAVBAR ====== -->
+    <header role="banner">
+        <nav class="navbar" aria-label="Navegación principal">
+            <div class="container nav-inner">
+                <a href="#" class="logo" aria-label="Encaja.app inicio">
+                    <span class="logo-main">Encaja</span><span class="logo-dot">.</span><span class="logo-ext">app</span>
+                </a>
+                <ul class="nav-links" role="list">
+                    <li><a href="#calculadoras">Calculadoras</a></li>
+                    <li><a href="#features">Por qué Encaja</a></li>
+                    <li><a href="#pricing">Planes</a></li>
+                    <li><a href="#contact">Contacto</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="app-container">
+
+        <!-- ====== HERO ====== -->
+        <section class="hero" aria-labelledby="hero-heading">
+            <div class="container hero-inner">
+                <div class="hero-tag">Herramienta gratuita para builders</div>
+
+                <h1 class="hero-title" id="hero-heading">
+                    Las cuentas de tu próxima obra,<br>
+                    <em>resueltas antes de empezar</em>
+                </h1>
+
+                <p class="hero-subtitle">
+                    Calcula exactamente qué necesitas: ladrillos, madera, pintura, suelos, azulejos y más.
+                    Sin sorpresas presupuestarias.
+                </p>
+
+                <div class="hero-cta">
+                    <a href="#calculadoras" class="btn btn-primary btn-lg">Comenzar Cálculo</a>
+                    <a href="#features" class="btn btn-ghost btn-lg">Ver Características</a>
+                </div>
+            </div>
+
+            <div class="hero-bottom container">
+                <div class="hero-stat">
+                    <span class="hero-stat-num">50<span>k+</span></span>
+                    <span class="hero-stat-label">Cálculos realizados</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">15<span>k+</span></span>
+                    <span class="hero-stat-label">Usuarios activos</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-num">€5<span>M+</span></span>
+                    <span class="hero-stat-label">En materiales calculados</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CALCULADORAS ====== -->
+        <section class="section-calculadoras" id="calculadoras" aria-labelledby="calcs-heading">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-label">Herramientas</span>
+                    <h2 id="calcs-heading">Elige la calculadora que necesitas</h2>
+                </div>
+
+                <div class="calc-grid" role="list">
+
+                    <!-- Muros y Tabiques -->
+                    <a href="calculadoras/muros.html" class="calc-card calc-muros" role="listitem" aria-label="Abrir calculadora de Muros y Tabiques">
+                        <div class="calc-card-icon" aria-hidden="true">🧱</div>
+                        <h3>Muros y Tabiques</h3>
+                        <p>Ladrillos, bloques y muros de carga. Con cálculo de huecos para puertas y ventanas.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">Ladrillos</span>
+                            <span class="calc-tag">Bloques</span>
+                            <span class="calc-tag">Huecos</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+
+                    <!-- Pintura -->
+                    <a href="calculadoras/pintura.html" class="calc-card calc-pintura" role="listitem" aria-label="Abrir calculadora de Pintura">
+                        <div class="calc-card-icon" aria-hidden="true">🎨</div>
+                        <h3>Pintura</h3>
+                        <p>Calcula botes de pintura por habitaciones. Con integración de tiendas.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">Por habitación</span>
+                            <span class="calc-tag">Productos reales</span>
+                            <span class="calc-tag">Stock</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+
+                    <!-- Madera / Despiece -->
+                    <a href="calculadoras/depiece.html" class="calc-card calc-madera" role="listitem" aria-label="Abrir calculadora de Madera y Despiece">
+                        <div class="calc-card-icon" aria-hidden="true">🪵</div>
+                        <h3>Madera</h3>
+                        <p>Tableros, listones y accesorios. Optimización de cortes y anidación.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">MDF · OSB · DM</span>
+                            <span class="calc-tag">Anidación</span>
+                            <span class="calc-tag">Desperdicio</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+
+                    <!-- Pavimentos -->
+                    <a href="calculadoras/pavimentos.html" class="calc-card calc-pavimentos" role="listitem" aria-label="Abrir calculadora de Pavimentos y Cerámica">
+                        <div class="calc-card-icon" aria-hidden="true">🧩</div>
+                        <h3>Pavimentos y Cerámica</h3>
+                        <p>Suelos y alicatados. Resultado directo en número de cajas/paquetes.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">Suelos</span>
+                            <span class="calc-tag">Azulejos</span>
+                            <span class="calc-tag">Cajas</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+
+                    <!-- Pladur / Cartón Yeso -->
+                    <a href="calculadoras/pladur.html" class="calc-card calc-pladur" role="listitem" aria-label="Abrir calculadora de Pladur y Cartón Yeso">
+                        <div class="calc-card-icon" aria-hidden="true">🏗️</div>
+                        <h3>Pladur / Cartón Yeso</h3>
+                        <p>Placas de yeso, perfiles metálicos y accesorios. Presupuesto completo de montaje.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">Paneles</span>
+                            <span class="calc-tag">Perfiles</span>
+                            <span class="calc-tag">Acabados</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+
+                    <!-- Ladrillos -->
+                    <a href="calculadoras/ladrillos.html" class="calc-card calc-muros" role="listitem" aria-label="Abrir calculadora de Ladrillos">
+                        <div class="calc-card-icon" aria-hidden="true">🏚️</div>
+                        <h3>Ladrillos y Bloques</h3>
+                        <p>Calcula ladrillos por muro con cajas y presupuesto. Datos reales de tiendas.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">Cajas</span>
+                            <span class="calc-tag">Precios reales</span>
+                            <span class="calc-tag">Merma</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+
+                    <!-- Despiece de Carpintería -->
+                    <a href="calculadoras/depiece.html" class="calc-card calc-depiece" role="listitem" aria-label="Abrir calculadora de Despiece de Carpintería">
+                        <div class="calc-card-icon" aria-hidden="true">🪚</div>
+                        <h3>Despiece de Madera</h3>
+                        <p>Diseña módulos de armario y optimiza el corte de tableros. Visualización canvas.</p>
+                        <div class="calc-tags" aria-label="Características">
+                            <span class="calc-tag">Armarios</span>
+                            <span class="calc-tag">Bin-packing</span>
+                            <span class="calc-tag">PDF</span>
+                        </div>
+                        <span class="calc-cta">Usar Calculadora</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== FEATURES ====== -->
+        <section class="section-features" id="features" aria-labelledby="features-heading">
+            <div class="container">
+                <div class="features-layout">
+
+                    <div class="features-copy">
+                        <span class="section-label">Por qué Encaja</span>
+                        <h2 id="features-heading">La plataforma que los profesionales usan</h2>
+                        <p>
+                            Diseñada por y para gente de obra. Cada cálculo está validado contra
+                            estándares reales de construcción española. Sin florituras, sin registros.
+                        </p>
+
+                        <div class="features-list" role="list">
+                            <div class="feature-item" role="listitem">
+                                <div class="feature-ico" aria-hidden="true">⚡</div>
+                                <div class="feature-text">
+                                    <h4>Cálculos Precisos</h4>
+                                    <p>Algoritmos validados. Basados en estándares de construcción reales.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item" role="listitem">
+                                <div class="feature-ico" aria-hidden="true">🔗</div>
+                                <div class="feature-text">
+                                    <h4>Integración Tiendas</h4>
+                                    <p>Acceso directo a Leroy, BricoDépot, Obramat con precios actuales.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item" role="listitem">
+                                <div class="feature-ico" aria-hidden="true">📱</div>
+                                <div class="feature-text">
+                                    <h4>100% Mobile</h4>
+                                    <p>Úsalo en la obra con tu teléfono. Funciona sin internet.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item" role="listitem">
+                                <div class="feature-ico" aria-hidden="true">🔐</div>
+                                <div class="feature-text">
+                                    <h4>100% Privado</h4>
+                                    <p>Tus cálculos no se guardan. Privacidad garantizada, sin registros.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mockup visual -->
+                    <div class="features-visual" aria-hidden="true">
+                        <div class="mockup-header">
+                            <span class="mockup-dot" style="background:#EF4444"></span>
+                            <span class="mockup-dot" style="background:#F59E0B"></span>
+                            <span class="mockup-dot" style="background:#10B981"></span>
+                            <span class="mockup-title">Calculadora de Muros — Encaja.app</span>
+                        </div>
+
+                        <div class="mockup-row">
+                            <span class="mockup-row-label">Largo pared</span>
+                            <span class="mockup-row-val">4.5 m</span>
+                        </div>
+                        <div class="mockup-row">
+                            <span class="mockup-row-label">Alto</span>
+                            <span class="mockup-row-val">2.5 m</span>
+                        </div>
+                        <div class="mockup-row">
+                            <span class="mockup-row-label">Material</span>
+                            <span class="mockup-row-val">Ladrillo Hueco Doble</span>
+                        </div>
+                        <div class="mockup-row">
+                            <span class="mockup-row-label">Superficie Neta</span>
+                            <span class="mockup-row-val">9.5 m²</span>
+                        </div>
+                        <div class="mockup-row">
+                            <span class="mockup-row-label">Precio Estimado</span>
+                            <span class="mockup-row-val">48.60 €</span>
+                        </div>
+
+                        <div class="mockup-result">
+                            <div class="mockup-result-label">Total a Comprar</div>
+                            <div class="mockup-result-num">272</div>
+                            <div class="mockup-result-unit">unidades (con merma incluida)</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== ANUNCIO ====== -->
+        <div class="ad-section container">
+            <div class="ad-placeholder">
+                <p class="ad-text">Espacio publicitario — Google AdSense</p>
+            </div>
+        </div>
+
+        <!-- ====== PRICING ====== -->
+        <section class="section-pricing" id="pricing" aria-labelledby="pricing-heading">
+            <div class="container">
+                <div class="section-head">
+                    <span class="section-label">Planes</span>
+                    <h2 id="pricing-heading">Ahora gratis. Siempre.</h2>
+                </div>
+
+                <div class="pricing-grid">
+
+                    <!-- Gratuito -->
+                    <div class="pricing-card is-current">
+                        <span class="pricing-badge">Plan Actual</span>
+                        <h3>Gratuito</h3>
+                        <p class="pricing-price">€0<sub>/mes</sub></p>
+                        <ul class="pricing-features" aria-label="Características del plan gratuito">
+                            <li>Todas las calculadoras</li>
+                            <li>Cálculos ilimitados</li>
+                            <li>Sin registro</li>
+                            <li>100% privado</li>
+                        </ul>
+                        <a href="#calculadoras" class="btn btn-primary">Comenzar ahora</a>
+                    </div>
+
+                    <!-- Premium -->
+                    <div class="pricing-card">
+                        <span class="pricing-badge">Próximamente</span>
+                        <h3>Premium</h3>
+                        <p class="pricing-price">€4.99<sub>/mes</sub></p>
+                        <ul class="pricing-features" aria-label="Características del plan premium">
+                            <li>Todo lo de Gratuito</li>
+                            <li>Presupuestos en PDF</li>
+                            <li>Historial guardado</li>
+                            <li>Integración con APIs</li>
+                            <li>Soporte prioritario</li>
+                        </ul>
+                        <button class="btn btn-primary" disabled>Próximamente</button>
+                    </div>
+
+                    <!-- Empresa -->
+                    <div class="pricing-card">
+                        <span class="pricing-badge">Próximamente</span>
+                        <h3>Empresa</h3>
+                        <p class="pricing-price">Contactar</p>
+                        <ul class="pricing-features" aria-label="Características del plan empresa">
+                            <li>Todo lo de Premium</li>
+                            <li>API propia</li>
+                            <li>Integración personalizada</li>
+                            <li>Equipo dedicado</li>
+                            <li>Formación incluida</li>
+                        </ul>
+                        <button class="btn btn-outline" disabled>Contactar</button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== CTA ====== -->
+        <section class="section-cta" aria-label="Llamada a la acción">
+            <div class="container">
+                <div class="cta-inner">
+                    <h2>¿Listo para resolver tus cuentas?</h2>
+                    <p>Elige tu primer cálculo y empieza ahora. Es gratis. Siempre.</p>
+                    <a href="#calculadoras" class="btn btn-primary btn-lg">Ir a Calculadoras</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== FOOTER ====== -->
+        <footer class="footer" id="contact" role="contentinfo">
+            <div class="container">
+                <div class="footer-grid">
+
+                    <div class="footer-brand">
+                        <a href="#" class="logo" aria-label="Encaja.app">
+                            <span class="logo-main">Encaja</span><span class="logo-dot">.</span><span class="logo-ext">app</span>
+                        </a>
+                        <p>Las cuentas de tu próxima obra, resueltas antes de empezar.</p>
+                        <div class="social-links" aria-label="Redes sociales">
+                            <a href="#" aria-label="Twitter">𝕏</a>
+                            <a href="#" aria-label="LinkedIn">in</a>
+                            <a href="#" aria-label="Instagram">ig</a>
+                        </div>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Producto</h4>
+                        <ul>
+                            <li><a href="#calculadoras">Calculadoras</a></li>
+                            <li><a href="#features">Características</a></li>
+                            <li><a href="#pricing">Pricing</a></li>
+                            <li><a href="#">Blog</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-col">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Aviso Legal</a></li>
+                            <li><a href="#">Privacidad</a></li>
+                            <li><a href="#">Cookies</a></li>
+                            <li><a href="#">Contacto</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <div class="footer-bottom">
+                    <p>&copy; 2024 Encaja.app — Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

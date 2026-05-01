@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculadora de Muros y Tabiques - Encaja.app">
+    <title>Calculadora de Muros y Tabiques | Encaja.app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="calc-header">
+            <div class="header-content">
+                <a href="../index.html" class="back-link">← Volver a Encaja</a>
+                <h1>🧱 Calculadora de Muros y Tabiques</h1>
+                <p class="subtitle">Calcula cuántos ladrillos o bloques necesitas para tu pared.</p>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <!-- Sidebar - Configuración -->
+            <aside class="sidebar">
+
+                <!-- 1. Seleccionar Producto -->
+                <section class="card">
+                    <h2>① Selecciona el material</h2>
+                    <select id="productSelector" class="form-select">
+                        <option value="">-- Elige un ladrillo/bloque --</option>
+                    </select>
+                    <div class="product-info" id="productInfo" style="display:none;">
+                        <div class="info-row">
+                            <span class="label">Dimensiones:</span>
+                            <span class="value" id="dimValue">0 x 0 x 0</span> cm
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Precio aprox:</span>
+                            <span class="value" id="precioValue">0</span> €/ud
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Tienda:</span>
+                            <span class="value" id="tiendaValue">-</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Dimensiones Pared -->
+                <section class="card">
+                    <h2>② Medidas de la pared</h2>
+                    <div class="input-group">
+                        <label for="largo">Largo Total (m)</label>
+                        <input type="number" id="largo" value="4" min="0.1" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="alto">Alto (m)</label>
+                        <input type="number" id="alto" value="2.5" min="0.1" step="0.1">
+                    </div>
+                </section>
+
+                <!-- 3. Huecos (Puertas/Ventanas) -->
+                <section class="card">
+                    <h2>③ Restar Huecos</h2>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="puertas">Nº Puertas</label>
+                            <input type="number" id="puertas" value="0" min="0" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="ventanas">Nº Ventanas</label>
+                            <input type="number" id="ventanas" value="0" min="0" step="1">
+                        </div>
+                    </div>
+                    <p class="info-box" style="font-size: 0.8rem; margin-top: 10px;">
+                        Estándar: Puerta (2m²), Ventana (1.2m²)
+                    </p>
+                </section>
+
+                <!-- 4. Ajustes Técnicos -->
+                <section class="card">
+                    <h2>④ Ajustes</h2>
+                    <div class="input-group">
+                        <label for="junta">Espesor Junta (cm)</label>
+                        <input type="number" id="junta" value="1.5" min="0.5" max="3" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="merma">% Desperdicio</label>
+                        <input type="number" id="merma" value="5" min="0" max="25" step="1">
+                    </div>
+                </section>
+
+            </aside>
+
+            <!-- Main Content - Resultados -->
+            <section class="main-content">
+
+                <!-- Resultado Principal -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <h2>📊 RESULTADO</h2>
+                    </div>
+
+                    <div class="result-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Superficie Neta</div>
+                            <div class="stat-value" id="superficieStat">0.00</div>
+                            <div class="stat-unit">m²</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Bricks / m²</div>
+                            <div class="stat-value" id="densidadStat">0.00</div>
+                            <div class="stat-unit">uds/m²</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Total Bruto</div>
+                            <div class="stat-value" id="totalBrutoStat">0</div>
+                            <div class="stat-unit">unidades</div>
+                        </div>
+                    </div>
+
+                    <div class="result-main">
+                        <div class="result-label">TOTAL A COMPRAR</div>
+                        <div class="result-number" id="totalResult">0</div>
+                        <div class="result-unit">unidades (con merma)</div>
+                        <div class="calculation-detail" id="calcDetail"></div>
+                    </div>
+
+                    <div class="result-prices">
+                        <div class="price-row">
+                            <span>Precio unitario aprox:</span>
+                            <span id="precioUnitario">-</span> €
+                        </div>
+                        <div class="price-row">
+                            <span>Presupuesto total aprox:</span>
+                            <span id="precioTotal">-</span> €
+                        </div>
+                    </div>
+
+                    <div class="result-footer">
+                        <p>💡 <strong>Nota:</strong> El cálculo considera el ladrillo puesto "de soga". Para otros aparejos, ajusta las medidas.</p>
+                    </div>
+                </div>
+
+                <!-- Sección de Tiendas -->
+                <section class="stores-section">
+                    <h2>🛒 Comprar Material</h2>
+                    <div class="stores-grid">
+                        <a href="https://www.obramat.es" class="store-card" target="_blank">
+                            <div class="store-logo">OBRAMAT</div>
+                            <div class="store-desc">Ladrillos, bloques y mortero</div>
+                            <div class="store-badge">Ver precios</div>
+                        </a>
+                        <a href="https://www.leroymerlin.es" class="store-card" target="_blank">
+                            <div class="store-logo">LEROY MERLIN</div>
+                            <div class="store-desc">Construcción y tabiquería</div>
+                            <div class="store-badge">Ver catálogo</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Sección de Consejos -->
+                <section class="tips-section">
+                    <h2>💡 Consejos de albañilería</h2>
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-icon">🧱</div>
+                            <h3>Nivelación</h3>
+                            <p>Usa siempre plomada y cordel. Revisa el nivel cada 2-3 hiladas.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">💧</div>
+                            <h3>Humedad</h3>
+                            <p>Moja los ladrillos antes de ponerlos para que no "roben" agua al mortero.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-icon">📐</div>
+                            <h3>Juntas</h3>
+                            <p>Mantén una junta uniforme (1-1.5cm) para asegurar la resistencia estructural.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Encaja.app - Las cuentas de tu próxima obra, resueltas antes de empezar.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../data/productos-muros.js"></script>
+    <script src="../js/calculadora-muros.js"></script>
+</body>
+</html>
