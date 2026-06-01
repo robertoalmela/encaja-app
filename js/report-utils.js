@@ -39,7 +39,16 @@
             .join('');
     }
 
-    function printHtmlReport({ title, subtitle = '', summaryCards = [], sections = [] }) {
+    function printHtmlReport({
+        title,
+        subtitle = '',
+        summaryCards = [],
+        sections = [],
+        rawHtml = '',
+        bodyOnly = false,
+        extraStyles = '',
+        pageMargin = '12mm'
+    }) {
         const iframe = document.createElement('iframe');
         iframe.style.position = 'fixed';
         iframe.style.right = '0';
@@ -61,7 +70,7 @@
     * { box-sizing: border-box; }
     body {
         margin: 0;
-        padding: 20px;
+        padding: ${bodyOnly ? '0' : '20px'};
         font-family: Inter, Arial, sans-serif;
         color: #1f2937;
         background: #fff;
@@ -138,14 +147,15 @@
     .muted {
         color: #6b7280;
     }
-    @page { size: A4 portrait; margin: 12mm; }
+    @page { size: A4 portrait; margin: ${pageMargin}; }
+    ${extraStyles}
 </style>
 </head>
 <body>
-    <h1>${escapeHtml(title || 'Encaja.app')}</h1>
-    ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ''}
-    ${summaryCards.length ? `<div class="summary">${buildSummaryCards(summaryCards)}</div>` : ''}
-    ${buildSections(sections)}
+    ${bodyOnly ? '' : `<h1>${escapeHtml(title || 'Encaja.app')}</h1>`}
+    ${bodyOnly ? '' : (subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : '')}
+    ${bodyOnly ? '' : (summaryCards.length ? `<div class="summary">${buildSummaryCards(summaryCards)}</div>` : '')}
+    ${rawHtml || buildSections(sections)}
 </body>
 </html>`;
 

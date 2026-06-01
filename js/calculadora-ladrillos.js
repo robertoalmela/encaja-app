@@ -171,7 +171,7 @@ class CalculadoraLadrillos {
 
 // Inicializar cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', () => {
-    new CalculadoraLadrillos();
+    window.calculadoraLadrillos = new CalculadoraLadrillos();
 });
 
 function getCompraLadrillosUrl() {
@@ -202,8 +202,8 @@ function imprimirInformeLadrillos() {
         subtitle: 'Resumen imprimible del cálculo de muro.',
         summaryCards: [
             { label: 'Producto', value: producto.nombre },
-            { label: 'Superficie', value: `${document.getElementById('surfaceResult').textContent} m²` },
-            { label: 'Ladrillos', value: document.getElementById('bricksResult').textContent },
+            { label: 'Superficie', value: `${document.getElementById('superficieStat').textContent} m²` },
+            { label: 'Ladrillos', value: document.getElementById('ladrillosExactosStat').textContent },
             { label: 'Compra', value: `${document.getElementById('totalResult').textContent} uds` }
         ],
         sections: [{

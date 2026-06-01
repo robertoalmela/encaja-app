@@ -1,5 +1,56 @@
 // ==================== LÓGICA CALCULADORA PAVIMENTOS Y CERÁMICA ====================
 
+let calculadoraPavimentosState = {
+    productoSeleccionado: null,
+    ultimaSuperficie: 0,
+    ultimoTotalM2: 0,
+    ultimasPiezas: 0,
+    ultimasCajas: 0,
+};
+
+function getCompraPavimentosUrl() {
+    const producto = calculadoraPavimentosState.productoSeleccionado;
+    if (!producto) return '';
+    return `https://www.leroymerlin.es/productos?q=${encodeURIComponent(producto.nombre)}`;
+}
+
+function irACompraPavimentos(event) {
+    if (event) event.preventDefault();
+    const url = getCompraPavimentosUrl();
+    if (!url) {
+        alert('Selecciona un producto antes de ir a la compra.');
+        return false;
+    }
+    window.open(url, '_blank', 'noopener');
+    return false;
+}
+
+function imprimirInformePavimentos() {
+    const producto = calculadoraPavimentosState.productoSeleccionado;
+    if (!producto) {
+        alert('Selecciona un producto antes de imprimir el informe.');
+        return;
+    }
+
+    EncajaReport.printHtmlReport({
+        title: 'Encaja.app · Informe de pavimentos y cerámica',
+        subtitle: 'Resumen imprimible para llevar a tienda.',
+        summaryCards: [
+            { label: 'Producto', value: producto.nombre },
+            { label: 'Superficie', value: `${calculadoraPavimentosState.ultimaSuperficie.toFixed(2)} m²` },
+            { label: 'Piezas', value: calculadoraPavimentosState.ultimasPiezas },
+            { label: 'Compra', value: `${calculadoraPavimentosState.ultimasCajas} cajas` }
+        ],
+        sections: [{
+            title: 'Detalle del cálculo',
+            html: `<div>${document.getElementById('calcDetail').innerHTML}</div>
+                   <p><strong>Precio por caja:</strong> ${document.getElementById('precioCajaDisplay').textContent} €</p>
+                   <p><strong>Precio total:</strong> ${document.getElementById('precioTotal').textContent} €</p>
+                   <p><strong>Enlace de compra:</strong> <span class="muted">${EncajaReport.escapeHtml(getCompraPavimentosUrl())}</span></p>`
+        }]
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const productSelector = document.getElementById('productSelector');
@@ -90,6 +141,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 5. Precios
         const id = productSelector.value;
         const p = id !== 'custom' ? obtenerProductoPavimento(id) : null;
+        calculadoraPavimentosState.productoSeleccionado = p || null;
+        calculadoraPavimentosState.ultimaSuperficie = areaBase;
+        calculadoraPavimentosState.ultimoTotalM2 = areaAComprar;
+        calculadoraPavimentosState.ultimasPiezas = Math.ceil(piezasTotal);
+        calculadoraPavimentosState.ultimasCajas = cajasTotal;
         
         if (p) {
             resPrecioCaja.textContent = p.precioCaja.toFixed(2);
@@ -110,6 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetResultados() {
+        calculadoraPavimentosState.productoSeleccionado = productSelector.value !== 'custom' ? obtenerProductoPavimento(productSelector.value) || null : null;
+        calculadoraPavimentosState.ultimaSuperficie = parseFloat(elements.largo.value) * parseFloat(elements.ancho.value) || 0;
+        calculadoraPavimentosState.ultimoTotalM2 = 0;
+        calculadoraPavimentosState.ultimasPiezas = 0;
+        calculadoraPavimentosState.ultimasCajas = 0;
         resTotalM2.textContent = "0.00";
         resPiezas.textContent = "0";
         resTotalResult.textContent = "0";

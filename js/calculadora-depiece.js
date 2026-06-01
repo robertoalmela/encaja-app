@@ -120,13 +120,23 @@ function showProductSelector(products) {
 
 // Añade un tablero a partir de datos de producto (o preset)
 function addMaterialFromProduct(product) {
+    const normalized = product && (product.name || product.w || product.l || product.thickness)
+        ? product
+        : {
+            ...product,
+            name: product?.name || product?.nombre || 'Tablero',
+            w: product?.w || product?.ancho,
+            l: product?.l || product?.largo,
+            thickness: product?.thickness || product?.espesor,
+            kerf: product?.kerf || 3,
+        };
     const mat = {
         id:        uid(),
-        name:      product.name,
-        w:         product.w,
-        l:         product.l,
-        thickness: product.thickness,
-        kerf:      product.kerf || 3,
+        name:      normalized.name,
+        w:         normalized.w,
+        l:         normalized.l,
+        thickness: normalized.thickness,
+        kerf:      normalized.kerf || 3,
     };
     state.materials.push(mat);
     setActiveMaterial(mat.id);
@@ -370,19 +380,33 @@ function runCalculation() {
         const bW = mat.w;
         const bL = mat.l;
 
-        // Ordenar piezas de mayor a menor área
-        pieces.sort((a, b) => (b.w * b.l) - (a.w * a.l));
+        // Ordenar piezas de mayor a menor, priorizando las más difíciles de encajar.
+        pieces.sort((a, b) => {
+            const areaDiff = (b.w * b.l) - (a.w * a.l);
+            if (areaDiff !== 0) return areaDiff;
+            const maxSideDiff = Math.max(b.w, b.l) - Math.max(a.w, a.l);
+            if (maxSideDiff !== 0) return maxSideDiff;
+            return Math.min(b.w, b.l) - Math.min(a.w, a.l);
+        });
 
         const boards = [];
         pieces.forEach(piece => {
-            let placed = false;
-            for (const board of boards) {
-                if (tryPlace(board, piece, kerf)) { placed = true; break; }
-            }
-            if (!placed) {
+            let placement = findBestPlacement(boards, piece, kerf);
+            if (!placement) {
                 const newBoard = { w: bW, l: bL, placements: [], spaces: [{ x: 0, y: 0, w: bW, l: bL }] };
                 boards.push(newBoard);
-                tryPlace(newBoard, piece, kerf);
+                placement = findBestPlacement([newBoard], piece, kerf);
+            }
+            if (placement) {
+                placeInSpace(
+                    placement.board,
+                    placement.spaceIdx,
+                    placement.width,
+                    placement.length,
+                    placement.name,
+                    kerf,
+                    placement.splitAxis
+                );
             }
         });
 
@@ -487,56 +511,170 @@ function printCutPlan() {
         return;
     }
 
-    const sections = boards.map((board, index) => {
+    const rawHtml = boards.map((board, index) => {
         const title = board.querySelector('.board-title')?.textContent?.trim() || `Tablero ${index + 1}`;
         const sourceCanvas = board.querySelector('canvas');
-        return {
-            title,
-            image: sourceCanvas ? sourceCanvas.toDataURL('image/png') : '',
-            alt: title,
-        };
-    });
+        const image = sourceCanvas ? sourceCanvas.toDataURL('image/png') : '';
+        return `
+            <div class="board-canvas-wrapper">
+                <div class="board-title">${EncajaReport.escapeHtml(title)}</div>
+                ${image ? `<img src="${image}" alt="${EncajaReport.escapeHtml(title)}">` : ''}
+            </div>
+        `;
+    }).join('');
 
     EncajaReport.printHtmlReport({
         title: 'Encaja.app · Despiece',
-        subtitle: 'Exportación del plano de corte. Este PDF incluye únicamente el campo de despiece.',
-        summaryCards: [
-            { label: 'Piezas', value: lastCutPlan.totalPieces },
-            { label: 'Tableros', value: lastCutPlan.totalBoardsUsed },
-            { label: 'Aprovechamiento', value: `${lastCutPlan.yieldPct}%` }
-        ],
-        sections,
+        rawHtml,
+        bodyOnly: true,
+        pageMargin: '8mm',
+        extraStyles: `
+            .board-canvas-wrapper {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin: 0 0 14px;
+                padding: 10px;
+                border: 1px solid #d6d3d1;
+                border-radius: 12px;
+                background: #fff;
+            }
+            .board-title {
+                margin: 0 0 8px;
+                font-size: 13px;
+                font-weight: 700;
+                color: #44403c;
+            }
+            .board-canvas-wrapper img {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                border-radius: 10px;
+            }
+        `
     });
 }
 
-function tryPlace(board, piece, kerf) {
-    for (let i = 0; i < board.spaces.length; i++) {
-        const sp = board.spaces[i];
-        // Orientación normal
-        if (piece.w + kerf <= sp.w && piece.l + kerf <= sp.l) {
-            placeInSpace(board, i, piece.w, piece.l, piece.name, kerf);
-            return true;
-        }
-        // Girada 90°
-        if (piece.l + kerf <= sp.w && piece.w + kerf <= sp.l) {
-            placeInSpace(board, i, piece.l, piece.w, piece.name + '↻', kerf);
-            return true;
-        }
-    }
-    return false;
+function findBestPlacement(boards, piece, kerf) {
+    let best = null;
+
+    boards.forEach(board => {
+        board.spaces.forEach((space, spaceIdx) => {
+            [
+                { width: piece.w, length: piece.l, name: piece.name },
+                { width: piece.l, length: piece.w, name: piece.name + '↻' }
+            ].forEach(option => {
+                if (!fitsInSpace(space, option.width, option.length)) return;
+                const evaluation = evaluatePlacement(space, option.width, option.length, kerf);
+                if (!best || evaluation.score < best.score) {
+                    best = {
+                        board,
+                        spaceIdx,
+                        width: option.width,
+                        length: option.length,
+                        name: option.name,
+                        splitAxis: evaluation.splitAxis,
+                        score: evaluation.score
+                    };
+                }
+            });
+        });
+    });
+
+    return best;
 }
 
-function placeInSpace(board, spaceIdx, pw, pl, name, kerf) {
+function fitsInSpace(space, width, length) {
+    return width <= space.w && length <= space.l;
+}
+
+function evaluatePlacement(space, width, length, kerf) {
+    const remainingW = Math.max(space.w - width, 0);
+    const remainingL = Math.max(space.l - length, 0);
+    const wasteArea = (space.w * space.l) - (width * length);
+    const shortSideFit = Math.min(remainingW, remainingL);
+    const longSideFit = Math.max(remainingW, remainingL);
+
+    const verticalRects = buildSplitRects(space, width, length, kerf, 'vertical');
+    const horizontalRects = buildSplitRects(space, width, length, kerf, 'horizontal');
+    const verticalQuality = evaluateSplitQuality(verticalRects, kerf);
+    const horizontalQuality = evaluateSplitQuality(horizontalRects, kerf);
+    const splitAxis = horizontalQuality.score < verticalQuality.score ? 'horizontal' : 'vertical';
+    const fragmentationPenalty = Math.abs(remainingW - remainingL);
+    const edgeFlushBonus = (remainingW <= kerf ? 1 : 0) + (remainingL <= kerf ? 1 : 0);
+    const splitQuality = splitAxis === 'horizontal' ? horizontalQuality : verticalQuality;
+
+    return {
+        splitAxis,
+        score: (wasteArea * 1000)
+            + (shortSideFit * 120)
+            + (longSideFit * 2)
+            + (fragmentationPenalty * 6)
+            + splitQuality.score
+            - (edgeFlushBonus * 250)
+    };
+}
+
+function evaluateSplitQuality(rects, kerf) {
+    if (!rects.length) {
+        return { score: -400, largestArea: 0, unusableArea: 0 };
+    }
+
+    const minReusableSide = Math.max(kerf * 4, 8);
+    const areas = rects.map(rect => rect.w * rect.l);
+    const largestArea = Math.max(...areas);
+    const unusableArea = rects
+        .filter(rect => Math.min(rect.w, rect.l) < minReusableSide)
+        .reduce((sum, rect) => sum + (rect.w * rect.l), 0);
+    const aspectPenalty = rects.reduce((sum, rect) => sum + Math.abs(rect.w - rect.l), 0);
+
+    return {
+        largestArea,
+        unusableArea,
+        score: (unusableArea * 20) - (largestArea * 1.5) + (rects.length * 40) + aspectPenalty
+    };
+}
+
+function buildSplitRects(space, width, length, kerf, splitAxis) {
+    const rightX = space.x + width + (space.w - width > 0 ? kerf : 0);
+    const bottomY = space.y + length + (space.l - length > 0 ? kerf : 0);
+    const rightW = space.w - width - (space.w - width > 0 ? kerf : 0);
+    const bottomL = space.l - length - (space.l - length > 0 ? kerf : 0);
+    const rects = [];
+
+    if (splitAxis === 'vertical') {
+        if (rightW > 0) rects.push({ x: rightX, y: space.y, w: rightW, l: space.l });
+        if (bottomL > 0) rects.push({ x: space.x, y: bottomY, w: width, l: bottomL });
+    } else {
+        if (rightW > 0) rects.push({ x: rightX, y: space.y, w: rightW, l: length });
+        if (bottomL > 0) rects.push({ x: space.x, y: bottomY, w: space.w, l: bottomL });
+    }
+
+    return rects.filter(rect => rect.w > 1 && rect.l > 1);
+}
+
+function placeInSpace(board, spaceIdx, pw, pl, name, kerf, splitAxis = 'vertical') {
     const sp = board.spaces.splice(spaceIdx, 1)[0];
     board.placements.push({ x: sp.x, y: sp.y, w: pw, l: pl, name });
 
-    const rightW = sp.w - pw - kerf;
-    const bottomL = sp.l - pl - kerf;
+    board.spaces.push(...buildSplitRects(sp, pw, pl, kerf, splitAxis));
+    board.spaces = pruneSpaces(board.spaces);
+    board.spaces.sort((a, b) => (a.y - b.y) || (a.x - b.x) || ((a.w * a.l) - (b.w * b.l)));
+}
 
-    if (rightW > 1)   board.spaces.push({ x: sp.x + pw + kerf, y: sp.y, w: rightW, l: pl });
-    if (bottomL > 1)  board.spaces.push({ x: sp.x, y: sp.y + pl + kerf, w: sp.w, l: bottomL });
-
-    board.spaces.sort((a, b) => (a.y - b.y) || (a.x - b.x));
+function pruneSpaces(spaces) {
+    return spaces.filter((space, index) => {
+        if (space.w <= 1 || space.l <= 1) return false;
+        return !spaces.some((other, otherIndex) => {
+            if (index === otherIndex) return false;
+            return (
+                space.x >= other.x &&
+                space.y >= other.y &&
+                space.x + space.w <= other.x + other.w &&
+                space.y + space.l <= other.y + other.l
+            );
+        });
+    });
 }
 
 // ==================== INIT ====================

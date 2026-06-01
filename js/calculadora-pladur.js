@@ -313,8 +313,8 @@ function imprimirInformePladur() {
         subtitle: 'Resumen imprimible de materiales y presupuesto.',
         summaryCards: [
             { label: 'Placa', value: estado.productoSeleccionado.nombre },
-            { label: 'Superficie', value: `${document.getElementById('surfaceResult').textContent} m²` },
-            { label: 'Placas', value: document.getElementById('boardsResult').textContent },
+            { label: 'Superficie', value: `${document.getElementById('statSuperficie').textContent} m²` },
+            { label: 'Placas', value: document.getElementById('statPlacas').textContent },
             { label: 'Total', value: `${document.getElementById('precioTotal').textContent} €` }
         ],
         sections: [{ title: 'Desglose del cálculo', html: `<div>${calcDetail.innerHTML}</div>` },
