@@ -757,15 +757,23 @@
         font-style: italic;
     }
 
+    .section-intro {
+        max-width: 62ch;
+        color: var(--dust);
+        font-size: 1rem;
+        margin-top: var(--space-md);
+        line-height: 1.7;
+    }
+
     /* ====================================================
-       PRICING SECTION
+       EXAMPLE SECTION
     ==================================================== */
-    .section-pricing {
+    .section-example {
         padding-top: var(--space-2xl);
         padding-bottom: var(--space-2xl);
     }
 
-    .pricing-grid {
+    .example-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: var(--space-lg);
@@ -773,14 +781,14 @@
     }
 
     @media (max-width: 1024px) {
-        .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+        .example-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
     @media (max-width: 768px) {
-        .pricing-grid { grid-template-columns: 1fr; }
+        .example-grid { grid-template-columns: 1fr; }
     }
 
-    .pricing-card {
+    .example-card {
         background: white;
         border: 1.5px solid var(--mist);
         border-radius: var(--radius-lg);
@@ -789,18 +797,18 @@
         transition: box-shadow var(--duration) var(--ease), transform var(--duration) var(--ease);
     }
 
-    .pricing-card:hover {
+    .example-card:hover {
         box-shadow: var(--shadow-md);
         transform: translateY(-4px);
     }
 
-    .pricing-card.is-current {
+    .example-card-output {
         border-color: var(--clay);
         background: var(--ink);
         color: var(--chalk);
     }
 
-    .pricing-badge {
+    .example-badge {
         display: inline-block;
         font-size: .72rem;
         font-weight: 700;
@@ -811,25 +819,25 @@
         margin-bottom: var(--space-md);
     }
 
-    .is-current .pricing-badge {
+    .example-card-output .example-badge {
         background: var(--clay);
         color: white;
     }
 
-    .pricing-card:not(.is-current) .pricing-badge {
+    .example-card:not(.example-card-output) .example-badge {
         background: var(--stone);
         color: var(--dust);
     }
 
-    .pricing-card h3 {
+    .example-card h3 {
         font-size: 1.4rem;
         margin-bottom: var(--space-sm);
         color: inherit;
     }
 
-    .is-current h3 { color: var(--chalk); }
+    .example-card-output h3 { color: var(--chalk); }
 
-    .pricing-price {
+    .example-metric {
         font-family: var(--font-display);
         font-size: 2.8rem;
         line-height: 1;
@@ -838,23 +846,30 @@
         color: var(--clay);
     }
 
-    .pricing-price sub {
-        font-family: var(--font-body);
-        font-size: 1rem;
-        color: var(--dust);
-        font-weight: 400;
-        letter-spacing: 0;
+    .example-card-output .example-metric {
+        color: white;
     }
 
-    .pricing-features {
+    .example-metric-label {
+        font-size: .9rem;
+        color: var(--dust);
+        margin-top: calc(var(--space-lg) * -0.5);
+        margin-bottom: var(--space-lg);
+    }
+
+    .example-card-output .example-metric-label {
+        color: rgba(250,250,248,.7);
+    }
+
+    .example-list {
         list-style: none;
-        margin-bottom: var(--space-xl);
+        margin-bottom: 0;
         display: flex;
         flex-direction: column;
         gap: var(--space-md);
     }
 
-    .pricing-features li {
+    .example-list li {
         display: flex;
         gap: var(--space-sm);
         font-size: .9rem;
@@ -862,19 +877,30 @@
         font-weight: 500;
     }
 
-    .is-current .pricing-features li { color: rgba(250,250,248,.85); }
+    .example-card-output .example-list li { color: rgba(250,250,248,.85); }
 
-    .pricing-features li::before {
-        content: '✓';
+    .example-list li::before {
+        content: '—';
         color: var(--clay);
         font-weight: 700;
     }
 
-    .pricing-card .btn { width: 100%; }
+    .example-card-output .example-list li::before {
+        color: rgba(250,250,248,.85);
+    }
 
-    .pricing-card:not(.is-current) .btn-primary {
-        background: var(--ink);
-        color: white;
+    .example-note {
+        margin-top: var(--space-lg);
+        padding-top: var(--space-lg);
+        border-top: 1px solid var(--mist);
+        color: var(--dust);
+        font-size: .92rem;
+        line-height: 1.7;
+    }
+
+    .example-card-output .example-note {
+        border-top-color: rgba(250,250,248,.12);
+        color: rgba(250,250,248,.72);
     }
 
     /* ====================================================
@@ -1040,7 +1066,7 @@
                 <ul class="nav-links" role="list">
                     <li><a href="#calculadoras">Calculadoras</a></li>
                     <li><a href="#features">Por qué Encaja</a></li>
-                    <li><a href="#pricing">Planes</a></li>
+                    <li><a href="#ejemplo">Ejemplo real</a></li>
                     <li><a href="#contact">Contacto</a></li>
                 </ul>
             </div>
@@ -1072,16 +1098,16 @@
 
             <div class="hero-bottom container">
                 <div class="hero-stat">
-                    <span class="hero-stat-num">50<span>k+</span></span>
-                    <span class="hero-stat-label">Cálculos realizados</span>
+                    <span class="hero-stat-num">7</span>
+                    <span class="hero-stat-label">calculadoras visibles en portada</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-num">15<span>k+</span></span>
-                    <span class="hero-stat-label">Usuarios activos</span>
+                    <span class="hero-stat-num">3</span>
+                    <span class="hero-stat-label">tiendas enlazadas en calculadoras con catálogo</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-num">€5<span>M+</span></span>
-                    <span class="hero-stat-label">En materiales calculados</span>
+                    <span class="hero-stat-num">0</span>
+                    <span class="hero-stat-label">registro obligatorio para empezar</span>
                 </div>
             </div>
         </section>
@@ -1197,10 +1223,10 @@
 
                     <div class="features-copy">
                         <span class="section-label">Por qué Encaja</span>
-                        <h2 id="features-heading">La plataforma que los profesionales usan</h2>
+                        <h2 id="features-heading">Hecha para decidir antes de comprar</h2>
                         <p>
-                            Diseñada por y para gente de obra. Cada cálculo está validado contra
-                            estándares reales de construcción española. Sin florituras, sin registros.
+                            Pensada para gente de obra y reformas. Convierte medidas en unidades,
+                            cajas y presupuesto orientativo sin pedir registro ni marearte con hojas de cálculo.
                         </p>
 
                         <div class="features-list" role="list">
@@ -1283,58 +1309,56 @@
             </div>
         </div>
 
-        <!-- ====== PRICING ====== -->
-        <section class="section-pricing" id="pricing" aria-labelledby="pricing-heading">
+        <!-- ====== EJEMPLO REAL ====== -->
+        <section class="section-example" id="ejemplo" aria-labelledby="example-heading">
             <div class="container">
                 <div class="section-head">
-                    <span class="section-label">Planes</span>
-                    <h2 id="pricing-heading">Ahora gratis. Siempre.</h2>
+                    <span class="section-label">Ejemplo real</span>
+                    <h2 id="example-heading">De una medida suelta a una compra cerrada</h2>
+                    <p class="section-intro">
+                        Un tabique interior de 3,0 × 2,5 m, con espesor de medio pie y 5% de merma.
+                        El mismo caso se traduce en material y coste antes de salir a comprar.
+                    </p>
                 </div>
 
-                <div class="pricing-grid">
+                <div class="example-grid">
 
-                    <!-- Gratuito -->
-                    <div class="pricing-card is-current">
-                        <span class="pricing-badge">Plan Actual</span>
-                        <h3>Gratuito</h3>
-                        <p class="pricing-price">€0<sub>/mes</sub></p>
-                        <ul class="pricing-features" aria-label="Características del plan gratuito">
-                            <li>Todas las calculadoras</li>
-                            <li>Cálculos ilimitados</li>
-                            <li>Sin registro</li>
-                            <li>100% privado</li>
+                    <div class="example-card example-card-input">
+                        <span class="example-badge">Entrada</span>
+                        <h3>Datos que metes</h3>
+                        <ul class="example-list" aria-label="Datos de entrada del cálculo">
+                            <li>Altura: <strong>2,5 m</strong></li>
+                            <li>Largo: <strong>3,0 m</strong></li>
+                            <li>Cantidad: <strong>1 muro</strong></li>
+                            <li>Espesor: <strong>medio pie (11,5 cm)</strong></li>
+                            <li>Merma: <strong>5%</strong></li>
                         </ul>
-                        <a href="#calculadoras" class="btn btn-primary">Comenzar ahora</a>
                     </div>
 
-                    <!-- Premium -->
-                    <div class="pricing-card">
-                        <span class="pricing-badge">Próximamente</span>
-                        <h3>Premium</h3>
-                        <p class="pricing-price">€4.99<sub>/mes</sub></p>
-                        <ul class="pricing-features" aria-label="Características del plan premium">
-                            <li>Todo lo de Gratuito</li>
-                            <li>Presupuestos en PDF</li>
-                            <li>Historial guardado</li>
-                            <li>Integración con APIs</li>
-                            <li>Soporte prioritario</li>
+                    <div class="example-card example-card-output">
+                        <span class="example-badge">Salida</span>
+                        <h3>Resultado técnico</h3>
+                        <div class="example-metric">7,5 m²</div>
+                        <p class="example-metric-label">superficie total</p>
+                        <ul class="example-list" aria-label="Resultado técnico del cálculo">
+                            <li><strong>390</strong> ladrillos exactos</li>
+                            <li><strong>410</strong> unidades mínimas con merma</li>
+                            <li><strong>9–11 cajas</strong> según el producto elegido</li>
                         </ul>
-                        <button class="btn btn-primary" disabled>Próximamente</button>
                     </div>
 
-                    <!-- Empresa -->
-                    <div class="pricing-card">
-                        <span class="pricing-badge">Próximamente</span>
-                        <h3>Empresa</h3>
-                        <p class="pricing-price">Contactar</p>
-                        <ul class="pricing-features" aria-label="Características del plan empresa">
-                            <li>Todo lo de Premium</li>
-                            <li>API propia</li>
-                            <li>Integración personalizada</li>
-                            <li>Equipo dedicado</li>
-                            <li>Formación incluida</li>
+                    <div class="example-card example-card-business">
+                        <span class="example-badge">Valor de negocio</span>
+                        <h3>Comparativa de compra</h3>
+                        <ul class="example-list" aria-label="Comparativa de compra entre tiendas">
+                            <li><strong>Obramat:</strong> 11 cajas · <strong>96,80 €</strong></li>
+                            <li><strong>BricoDépot:</strong> 9 cajas · <strong>144,00 €</strong></li>
+                            <li><strong>Leroy Merlin:</strong> 9 cajas · <strong>157,50 €</strong></li>
                         </ul>
-                        <button class="btn btn-outline" disabled>Contactar</button>
+                        <p class="example-note">
+                            En este caso la diferencia entre la opción más barata y la más cara es de <strong>60,70 €</strong>.
+                            Eso es lo útil: pasar de “creo que necesito ladrillos” a una decisión de compra concreta.
+                        </p>
                     </div>
 
                 </div>
@@ -1374,7 +1398,7 @@
                         <ul>
                             <li><a href="#calculadoras">Calculadoras</a></li>
                             <li><a href="#features">Características</a></li>
-                            <li><a href="#pricing">Pricing</a></li>
+                            <li><a href="#ejemplo">Ejemplo real</a></li>
                             <li><a href="#">Blog</a></li>
                         </ul>
                     </div>

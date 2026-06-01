@@ -8,6 +8,8 @@ let state = {
     activeMaterial: null,
 };
 
+let lastCutPlan = null;
+
 // Helper: obtener productos disponibles o presets por defecto
 function getProductOptions() {
     if (typeof PRODUCTOS_TABLEROS !== 'undefined' && PRODUCTOS_TABLEROS.length > 0) {
@@ -461,6 +463,144 @@ function runCalculation() {
     document.getElementById('statBoards').textContent = totalBoardsUsed;
     const yieldPct = totalArea > 0 ? Math.round((usedArea / totalArea) * 100) : 0;
     document.getElementById('statYield').textContent = yieldPct + '%';
+    lastCutPlan = {
+        totalBoardsUsed,
+        totalPieces: state.parts.reduce((sum, piece) => sum + piece.qty, 0),
+        yieldPct,
+    };
+}
+
+function printCutPlan() {
+    if (!state.parts.length) {
+        alert('Añade piezas antes de exportar el PDF.');
+        return;
+    }
+
+    if (!lastCutPlan) runCalculation();
+
+    const source = document.getElementById('visualizerContainer');
+    const boards = Array.from(source.querySelectorAll('.board-canvas-wrapper'));
+    if (!boards.length) {
+        alert('Calcula el despiece antes de exportar el PDF.');
+        return;
+    }
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=1200,height=900');
+    if (!printWindow) {
+        alert('El navegador bloqueó la ventana de impresión. Permite pop-ups e inténtalo de nuevo.');
+        return;
+    }
+
+    const styles = `
+        <style>
+            :root { color-scheme: light; }
+            * { box-sizing: border-box; }
+            body {
+                margin: 0;
+                padding: 24px;
+                font-family: Inter, Arial, sans-serif;
+                color: #1f2937;
+                background: #ffffff;
+            }
+            h1 {
+                margin: 0 0 6px;
+                font-size: 24px;
+            }
+            .subtitle {
+                margin: 0 0 20px;
+                color: #6b7280;
+                font-size: 13px;
+            }
+            .summary {
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 24px;
+            }
+            .summary-card {
+                border: 1px solid #d1d5db;
+                border-radius: 12px;
+                padding: 12px 14px;
+                min-width: 150px;
+                background: #f9fafb;
+            }
+            .summary-card strong {
+                display: block;
+                font-size: 22px;
+                line-height: 1.1;
+                color: #065f46;
+            }
+            .summary-card span {
+                display: block;
+                margin-top: 4px;
+                font-size: 12px;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+            }
+            .board {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 24px;
+            }
+            .board-title {
+                font-weight: 700;
+                font-size: 15px;
+                margin-bottom: 10px;
+            }
+            canvas {
+                display: block;
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                border: 1px solid #d1d5db;
+                border-radius: 12px;
+            }
+            @page { size: A4 portrait; margin: 12mm; }
+        </style>
+    `;
+
+    printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Encaja.app · Despiece</title>${styles}</head><body></body></html>`);
+    printWindow.document.close();
+
+    const body = printWindow.document.body;
+    body.insertAdjacentHTML('beforeend', `
+        <h1>Encaja.app · Despiece</h1>
+        <p class="subtitle">Exportación del plano de corte. Este PDF incluye solo el despiece generado.</p>
+        <div class="summary">
+            <div class="summary-card"><strong>${lastCutPlan.totalPieces}</strong><span>Piezas</span></div>
+            <div class="summary-card"><strong>${lastCutPlan.totalBoardsUsed}</strong><span>Tableros</span></div>
+            <div class="summary-card"><strong>${lastCutPlan.yieldPct}%</strong><span>Aprovechamiento</span></div>
+        </div>
+    `);
+
+    boards.forEach((board, index) => {
+        const wrapper = printWindow.document.createElement('section');
+        wrapper.className = 'board';
+        const title = board.querySelector('.board-title')?.textContent?.trim() || `Tablero ${index + 1}`;
+        const heading = printWindow.document.createElement('div');
+        heading.className = 'board-title';
+        heading.textContent = title;
+        wrapper.appendChild(heading);
+
+        const sourceCanvas = board.querySelector('canvas');
+        if (sourceCanvas) {
+            const clonedCanvas = printWindow.document.createElement('canvas');
+            clonedCanvas.width = sourceCanvas.width;
+            clonedCanvas.height = sourceCanvas.height;
+            const ctx = clonedCanvas.getContext('2d');
+            ctx.drawImage(sourceCanvas, 0, 0);
+            wrapper.appendChild(clonedCanvas);
+        }
+
+        body.appendChild(wrapper);
+    });
+
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 250);
 }
 
 // -------- Algoritmo guillotine simple --------
