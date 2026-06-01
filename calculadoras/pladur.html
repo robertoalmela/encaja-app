@@ -347,6 +347,11 @@
                         Selecciona una placa e introduce la superficie para calcular.
                     </div>
 
+                    <div class="result-actions">
+                        <button class="btn btn-secondary" type="button" onclick="imprimirInformePladur()">🖨️ Imprimir informe</button>
+                        <a class="btn btn-outline" id="buySelectedProductBtn" href="#comprar" onclick="return irACompraPladur(event)">🛒 Comprar producto</a>
+                    </div>
+
                     <div class="result-footer">
                         <p>💡 <strong>Nota:</strong> Los precios son orientativos. Consulta en tienda para precios exactos. Se incluye un 10% de merma estándar.</p>
                     </div>
@@ -421,6 +426,7 @@
 
     <!-- Scripts -->
     <script src="../data/productos-pladur.js"></script>
+    <script src="../js/report-utils.js"></script>
     <script src="../js/calculadora-pladur.js"></script>
 </body>
 </html>

@@ -173,3 +173,44 @@ class CalculadoraLadrillos {
 document.addEventListener('DOMContentLoaded', () => {
     new CalculadoraLadrillos();
 });
+
+function getCompraLadrillosUrl() {
+    const producto = window.calculadoraLadrillos?.productoSeleccionado;
+    if (!producto) return '';
+    return `https://www.leroymerlin.es/productos?q=${encodeURIComponent(producto.nombre)}`;
+}
+
+function irACompraLadrillos(event) {
+    if (event) event.preventDefault();
+    const url = getCompraLadrillosUrl();
+    if (!url) {
+        alert('Selecciona un producto antes de ir a la compra.');
+        return false;
+    }
+    window.open(url, '_blank', 'noopener');
+    return false;
+}
+
+function imprimirInformeLadrillos() {
+    const producto = window.calculadoraLadrillos?.productoSeleccionado;
+    if (!producto) {
+        alert('Selecciona un producto antes de imprimir el informe.');
+        return;
+    }
+    EncajaReport.printHtmlReport({
+        title: 'Encaja.app · Informe de ladrillos y bloques',
+        subtitle: 'Resumen imprimible del cálculo de muro.',
+        summaryCards: [
+            { label: 'Producto', value: producto.nombre },
+            { label: 'Superficie', value: `${document.getElementById('surfaceResult').textContent} m²` },
+            { label: 'Ladrillos', value: document.getElementById('bricksResult').textContent },
+            { label: 'Compra', value: `${document.getElementById('totalResult').textContent} uds` }
+        ],
+        sections: [{
+            title: 'Detalle del cálculo',
+            html: `<div>${document.getElementById('calcDetail').innerHTML}</div>
+                   <p><strong>Presupuesto estimado:</strong> ${document.getElementById('precioTotal').textContent} €</p>
+                   <p><strong>Enlace de compra:</strong> <span class="muted">${EncajaReport.escapeHtml(getCompraLadrillosUrl())}</span></p>`
+        }]
+    });
+}

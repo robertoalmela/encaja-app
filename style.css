@@ -784,3 +784,15 @@ textarea:focus {
         grid-template-columns: 1fr;
     }
 }
+
+.result-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.result-actions .btn {
+    flex: 1 1 220px;
+    justify-content: center;
+}

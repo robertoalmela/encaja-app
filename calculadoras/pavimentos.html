@@ -136,6 +136,11 @@
                         </div>
                     </div>
 
+                    <div class="result-actions">
+                        <button class="btn btn-secondary" type="button" onclick="imprimirInformePavimentos()">🖨️ Imprimir informe</button>
+                        <a class="btn btn-outline" id="buySelectedProductBtn" href="#comprar" onclick="return irACompraPavimentos(event)">🛒 Comprar producto</a>
+                    </div>
+
                     <div class="result-footer" style="border-color: var(--secondary); color: #065f46; background: #ecfdf5;">
                         <p>💡 <strong>Recomendación:</strong> Siempre compra una caja de más para futuros repuestos en caso de roturas.</p>
                     </div>
@@ -191,6 +196,7 @@
 
     <!-- Scripts -->
     <script src="../data/productos-pavimentos.js"></script>
+    <script src="../js/report-utils.js"></script>
     <script src="../js/calculadora-pavimentos.js"></script>
 </body>
 </html>

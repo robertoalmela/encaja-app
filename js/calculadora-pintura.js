@@ -219,3 +219,43 @@ function calcular() {
 // ==================== INIT ====================
 
 document.addEventListener('DOMContentLoaded', inicializar);
+
+function getCompraPinturaUrl() {
+    if (!estado.productoSeleccionado) return '';
+    return estado.productoSeleccionado.tiendaLink || linkLeroy.href || '';
+}
+
+function irACompraPintura(event) {
+    if (event) event.preventDefault();
+    const url = getCompraPinturaUrl();
+    if (!url) {
+        alert('Selecciona un producto antes de ir a la compra.');
+        return false;
+    }
+    window.open(url, '_blank', 'noopener');
+    return false;
+}
+
+function imprimirInformePintura() {
+    if (!estado.productoSeleccionado) {
+        alert('Selecciona un producto antes de imprimir el informe.');
+        return;
+    }
+    EncajaReport.printHtmlReport({
+        title: 'Encaja.app · Informe de pintura',
+        subtitle: 'Resumen imprimible de la estimación de pintura.',
+        summaryCards: [
+            { label: 'Producto', value: estado.productoSeleccionado.nombre },
+            { label: 'Superficie', value: `${superficieStat.textContent} m²` },
+            { label: 'Litros', value: `${litrosStat.textContent} L` },
+            { label: 'Compra', value: `${totalResult.textContent} botes` }
+        ],
+        sections: [{
+            title: 'Detalle del cálculo',
+            html: `<div>${calcDetail.innerHTML}</div>
+                   <p><strong>Precio unitario:</strong> ${precioUnitario.textContent} €</p>
+                   <p><strong>Precio total:</strong> ${precioTotal.textContent} €</p>
+                   <p><strong>Enlace de compra:</strong> <span class="muted">${EncajaReport.escapeHtml(getCompraPinturaUrl())}</span></p>`
+        }]
+    });
+}

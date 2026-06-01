@@ -284,3 +284,41 @@ function calcular() {
 // ==================== INIT ====================
 
 document.addEventListener('DOMContentLoaded', inicializar);
+
+
+function getCompraPladurUrl() {
+    if (!estado.productoSeleccionado) return '';
+    return linkLeroy.href || '';
+}
+
+function irACompraPladur(event) {
+    if (event) event.preventDefault();
+    const url = getCompraPladurUrl();
+    if (!url) {
+        alert('Selecciona una placa antes de ir a la compra.');
+        return false;
+    }
+    window.open(url, '_blank', 'noopener');
+    return false;
+}
+
+function imprimirInformePladur() {
+    if (!estado.productoSeleccionado) {
+        alert('Selecciona una placa antes de imprimir el informe.');
+        return;
+    }
+    const tabla = document.querySelector('.breakdown-table')?.outerHTML || '';
+    EncajaReport.printHtmlReport({
+        title: 'Encaja.app · Informe de pladur',
+        subtitle: 'Resumen imprimible de materiales y presupuesto.',
+        summaryCards: [
+            { label: 'Placa', value: estado.productoSeleccionado.nombre },
+            { label: 'Superficie', value: `${document.getElementById('surfaceResult').textContent} m²` },
+            { label: 'Placas', value: document.getElementById('boardsResult').textContent },
+            { label: 'Total', value: `${document.getElementById('precioTotal').textContent} €` }
+        ],
+        sections: [{ title: 'Desglose del cálculo', html: `<div>${calcDetail.innerHTML}</div>` },
+                   { title: 'Materiales estimados', html: tabla },
+                   { title: 'Compra', html: `<p><strong>Enlace recomendado:</strong> <span class="muted">${EncajaReport.escapeHtml(getCompraPladurUrl())}</span></p>` }]
+    });
+}
