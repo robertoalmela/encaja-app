@@ -460,12 +460,14 @@ function runCalculation() {
     });
 
     // Actualizar stats
+    const totalPieces = state.parts.reduce((sum, piece) => sum + piece.qty, 0);
+    document.getElementById('statParts').textContent = totalPieces;
     document.getElementById('statBoards').textContent = totalBoardsUsed;
     const yieldPct = totalArea > 0 ? Math.round((usedArea / totalArea) * 100) : 0;
     document.getElementById('statYield').textContent = yieldPct + '%';
     lastCutPlan = {
         totalBoardsUsed,
-        totalPieces: state.parts.reduce((sum, piece) => sum + piece.qty, 0),
+        totalPieces,
         yieldPct,
     };
 }
