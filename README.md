@@ -6,6 +6,8 @@
 
 **Claim**: *"Las cuentas de tu próxima obra, resueltas antes de empezar."*
 
+**🌐 Publicada**: https://robertoalmela.github.io/encaja-app/ (GitHub Pages desde `main`; pendiente apuntar el dominio encaja.app). Calculadoras online: pintura, ladrillos, pavimentos, pladur y despiece de tableros.
+
 ### Características Principales
 
 ```
